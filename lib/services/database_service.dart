@@ -98,8 +98,8 @@ class DatabaseService {
         );
       }
 
-      AppLogger.logRequest(
-          'REGISTER', 'SELECT id_compte FROM Account WHERE username = ?', [username]);
+      AppLogger.logRequest('REGISTER',
+          'SELECT id_compte FROM Account WHERE username = ?', [username]);
 
       // Vérifier l'unicité du username
       final existingUser = await _mysqlService.query(

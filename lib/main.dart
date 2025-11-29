@@ -9,6 +9,7 @@ import 'screens/prospects_screen.dart';
 import 'screens/stats_screen.dart';
 import 'screens/export_prospects_screen.dart';
 import 'screens/about_screen.dart';
+import 'screens/profile_screen.dart';
 import 'widgets/sidebar_navigation.dart';
 
 void main() async {
@@ -114,6 +115,8 @@ class _MainScreenState extends State<MainScreen> {
       case 3:
         return 'À propos';
       case 4:
+        return 'Profil';
+      case 5:
         return 'Configuration';
       default:
         return 'Prospectius';
@@ -131,6 +134,8 @@ class _MainScreenState extends State<MainScreen> {
       case 3:
         return const AboutScreen();
       case 4:
+        return const ProfileScreen();
+      case 5:
         return const Center(
           child: Text('Bientôt disponible'),
         );

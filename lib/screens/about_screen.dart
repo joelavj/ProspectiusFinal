@@ -13,10 +13,6 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('À propos'),
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
         child: Center(
           child: Padding(

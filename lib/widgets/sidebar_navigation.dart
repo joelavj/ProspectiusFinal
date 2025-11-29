@@ -105,9 +105,15 @@ class SidebarNavigation extends StatelessWidget {
                   ),
                   _buildNavItem(
                     context,
+                    icon: Icons.person,
+                    label: 'Profil',
+                    index: 4,
+                  ),
+                  _buildNavItem(
+                    context,
                     icon: Icons.settings,
                     label: 'Configuration',
-                    index: 4,
+                    index: 5,
                   ),
                 ],
               ),
