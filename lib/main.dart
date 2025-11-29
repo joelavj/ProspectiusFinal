@@ -10,6 +10,7 @@ import 'screens/stats_screen.dart';
 import 'screens/export_prospects_screen.dart';
 import 'screens/about_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/clients_screen.dart';
 import 'widgets/sidebar_navigation.dart';
 
 void main() async {
@@ -111,12 +112,14 @@ class _MainScreenState extends State<MainScreen> {
       case 1:
         return 'Statistiques';
       case 2:
-        return 'Exporter';
+        return 'Clients';
       case 3:
-        return 'À propos';
+        return 'Exporter';
       case 4:
-        return 'Profil';
+        return 'À propos';
       case 5:
+        return 'Profil';
+      case 6:
         return 'Configuration';
       default:
         return 'Prospectius';
@@ -130,12 +133,14 @@ class _MainScreenState extends State<MainScreen> {
       case 1:
         return const StatsScreen();
       case 2:
-        return const ExportProspectsScreen();
+        return const ClientsScreen();
       case 3:
-        return const AboutScreen();
+        return const ExportProspectsScreen();
       case 4:
-        return const ProfileScreen();
+        return const AboutScreen();
       case 5:
+        return const ProfileScreen();
+      case 6:
         return const Center(
           child: Text('Bientôt disponible'),
         );

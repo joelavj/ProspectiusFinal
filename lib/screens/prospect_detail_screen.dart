@@ -18,16 +18,18 @@ class ProspectDetailScreen extends StatefulWidget {
 class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
   final _descriptionController = TextEditingController();
   String _selectedType = 'Appel';
+  late Prospect _currentProspect;
 
   @override
   void initState() {
     super.initState();
+    _currentProspect = widget.prospect;
     _loadInteractions();
   }
 
   void _loadInteractions() {
     final prospectProvider = context.read<ProspectProvider>();
-    prospectProvider.loadInteractions(widget.prospect.id);
+    prospectProvider.loadInteractions(_currentProspect.id);
   }
 
   void _handleAddInteraction() async {
@@ -37,7 +39,7 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
     if (authProvider.currentUser == null) return;
 
     await prospectProvider.createInteraction(
-      widget.prospect.id,
+      _currentProspect.id,
       authProvider.currentUser!.id,
       _selectedType,
       _descriptionController.text,
@@ -46,6 +48,51 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
 
     _descriptionController.clear();
     _loadInteractions();
+  }
+
+  void _changeStatus(String newStatus) async {
+    final authProvider = context.read<AuthProvider>();
+    final prospectProvider = context.read<ProspectProvider>();
+
+    if (authProvider.currentUser == null) return;
+
+    final success = await prospectProvider.updateProspect(
+      authProvider.currentUser!.id,
+      _currentProspect.id,
+      {
+        'nomp': _currentProspect.nom,
+        'prenomp': _currentProspect.prenom,
+        'email': _currentProspect.email,
+        'telephone': _currentProspect.telephone,
+        'adresse': _currentProspect.adresse,
+        'type': _currentProspect.type,
+        'status': newStatus,
+      },
+    );
+
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Statut changé en: $newStatus'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      // Mettre à jour le prospect local
+      _currentProspect = Prospect(
+        id: _currentProspect.id,
+        nom: _currentProspect.nom,
+        prenom: _currentProspect.prenom,
+        email: _currentProspect.email,
+        telephone: _currentProspect.telephone,
+        adresse: _currentProspect.adresse,
+        type: _currentProspect.type,
+        status: newStatus,
+        creation: _currentProspect.creation,
+        dateUpdate: DateTime.now(),
+        assignation: _currentProspect.assignation,
+      );
+      setState(() {});
+    }
   }
 
   void _handleDelete() async {
@@ -74,7 +121,7 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
       if (authProvider.currentUser != null) {
         final success = await prospectProvider.deleteProspect(
           authProvider.currentUser!.id,
-          widget.prospect.id,
+          _currentProspect.id,
         );
         if (success && mounted) {
           Navigator.of(context).pop();
@@ -93,7 +140,7 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.prospect.fullName),
+        title: Text(_currentProspect.fullName),
         elevation: 0,
         actions: [
           PopupMenuButton(
@@ -103,7 +150,7 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
                     .push(
                       MaterialPageRoute(
                         builder: (_) =>
-                            AddProspectScreen(prospect: widget.prospect),
+                            AddProspectScreen(prospect: _currentProspect),
                       ),
                     )
                     .then((_) => _loadInteractions());
@@ -147,14 +194,67 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow('Email', widget.prospect.email),
-                    _buildInfoRow('Téléphone', widget.prospect.telephone),
-                    _buildInfoRow('Adresse', widget.prospect.adresse),
-                    _buildInfoRow('Type', widget.prospect.type),
-                    _buildInfoRow('Statut', widget.prospect.status),
+                    // En-tête avec nom et statut
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _currentProspect.fullName,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _currentProspect.type,
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Bouton pour changer le statut
+                        PopupMenuButton<String>(
+                          onSelected: (value) => _changeStatus(value),
+                          itemBuilder: (BuildContext context) => [
+                            'nouveau',
+                            'interesse',
+                            'negociation',
+                            'perdu',
+                            'converti'
+                          ]
+                              .map(
+                                (status) => PopupMenuItem(
+                                  value: status,
+                                  child: Text(status),
+                                ),
+                              )
+                              .toList(),
+                          child: Chip(
+                            label: Text(_currentProspect.status),
+                            backgroundColor: _getStatusColor(
+                              _currentProspect.status,
+                            ),
+                            labelPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 12),
+                    _buildInfoRow('Email', _currentProspect.email),
+                    _buildInfoRow('Téléphone', _currentProspect.telephone),
+                    _buildInfoRow('Adresse', _currentProspect.adresse),
                     _buildInfoRow(
                       'Créé le',
-                      '${widget.prospect.creation.day}/${widget.prospect.creation.month}/${widget.prospect.creation.year}',
+                      '${_currentProspect.creation.day}/${_currentProspect.creation.month}/${_currentProspect.creation.year}',
                     ),
                   ],
                 ),
@@ -293,6 +393,23 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
         return Icons.people;
       default:
         return Icons.message;
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'nouveau':
+        return Colors.blue[100]!;
+      case 'interesse':
+        return Colors.amber[100]!;
+      case 'negociation':
+        return Colors.orange[100]!;
+      case 'converti':
+        return Colors.green[100]!;
+      case 'perdu':
+        return Colors.red[100]!;
+      default:
+        return Colors.grey[100]!;
     }
   }
 }
