@@ -1,58 +1,80 @@
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
+import 'package:bcrypt/bcrypt.dart';
 import 'mysql_service.dart';
 import '../models/account.dart';
 import '../models/prospect.dart';
 import '../models/interaction.dart';
 import '../models/stats.dart';
+import '../utils/exception_handler.dart';
+import '../utils/app_logger.dart';
+import '../utils/validators.dart';
 
 class DatabaseService {
   final MySQLService _mysqlService = MySQLService();
 
   // === AUTHENTIFICATION ===
 
-  Future<Map<String, dynamic>> authenticate(
+  Future<Account> authenticate(
     String username,
     String password,
   ) async {
     try {
+      AppLogger.logRequest(
+          'AUTH', 'SELECT * FROM Account WHERE username = ?', [username]);
+
       final results = await _mysqlService.query(
         'SELECT * FROM Account WHERE username = ?',
         [username],
       );
 
       if (results.isEmpty) {
-        return {'success': false, 'message': 'Utilisateur non trouvé'};
+        AppLogger.warning(
+            'Tentative d\'authentification: utilisateur "$username" non trouvé');
+        throw AuthException(
+          message: 'Utilisateur non trouvé',
+          code: 'USER_NOT_FOUND',
+        );
       }
 
       final row = results.first;
       final hashedPassword = row['password'] as String;
-      final passwordHash = sha256.convert(utf8.encode(password)).toString();
 
-      // Simple hash comparison - À améliorer avec bcrypt si possible
-      if (hashedPassword != passwordHash &&
-          !_verifyPassword(password, hashedPassword)) {
-        return {'success': false, 'message': 'Mot de passe incorrect'};
+      // Vérifier le mot de passe avec bcrypt
+      final isPasswordValid = BCrypt.checkpw(password, hashedPassword);
+
+      if (!isPasswordValid) {
+        AppLogger.warning(
+            'Tentative d\'authentification: mot de passe incorrect pour "$username"');
+        throw AuthException(
+          message: 'Mot de passe incorrect',
+          code: 'INVALID_PASSWORD',
+        );
       }
 
-      return {
-        'success': true,
-        'user': Account(
-          id: row['id'] as int,
-          nom: row['nom'] as String,
-          prenom: row['prenom'] as String,
-          email: row['email'] as String,
-          username: row['username'] as String,
-          typeCompte: row['type_compte'] as String,
-          dateCreation: DateTime.parse(row['date_creation'].toString()),
-        ),
-      };
-    } catch (e) {
-      return {'success': false, 'message': 'Erreur: $e'};
+      final user = Account(
+        id: row['id'] as int,
+        nom: row['nom'] as String,
+        prenom: row['prenom'] as String,
+        email: row['email'] as String,
+        username: row['username'] as String,
+        typeCompte: row['type_compte'] as String,
+        dateCreation: DateTime.parse(row['date_creation'].toString()),
+      );
+
+      AppLogger.success('Authentification réussie pour ${user.fullName}');
+      return user;
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.error('Erreur lors de l\'authentification', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de l\'authentification: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
-  Future<Map<String, dynamic>> createAccount(
+  Future<void> createAccount(
     String nom,
     String prenom,
     String email,
@@ -60,6 +82,25 @@ class DatabaseService {
     String password,
   ) async {
     try {
+      // Valider les données
+      final validationResult = Validators.validateRegistration(
+        nom: nom,
+        prenom: prenom,
+        email: email,
+        username: username,
+        password: password,
+      );
+
+      if (!validationResult.isValid) {
+        throw ValidationException(
+          message: validationResult.error!,
+          code: 'INVALID_INPUT',
+        );
+      }
+
+      AppLogger.logRequest(
+          'REGISTER', 'SELECT id FROM Account WHERE username = ?', [username]);
+
       // Vérifier l'unicité du username
       final existingUser = await _mysqlService.query(
         'SELECT id FROM Account WHERE username = ?',
@@ -67,11 +108,22 @@ class DatabaseService {
       );
 
       if (existingUser.isNotEmpty) {
-        return {'success': false, 'message': 'Cet identifiant existe déjà'};
+        AppLogger.warning(
+            'Tentative de création: utilisateur "$username" existe déjà');
+        throw ValidationException(
+          message: 'Cet identifiant existe déjà',
+          code: 'USERNAME_EXISTS',
+        );
       }
 
-      // Hacher le mot de passe
-      final passwordHash = sha256.convert(utf8.encode(password)).toString();
+      // Hacher le mot de passe avec bcrypt
+      final passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
+
+      AppLogger.logRequest(
+        'REGISTER',
+        'INSERT INTO Account',
+        [nom, prenom, email, username, '***', 'Utilisateur'],
+      );
 
       // Insérer le nouvel utilisateur
       await _mysqlService.query(
@@ -80,9 +132,16 @@ class DatabaseService {
         [nom, prenom, email, username, passwordHash, 'Utilisateur'],
       );
 
-      return {'success': true, 'message': 'Compte créé avec succès'};
-    } catch (e) {
-      return {'success': false, 'message': 'Erreur: $e'};
+      AppLogger.success('Compte créé avec succès pour $username');
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.error('Erreur lors de la création du compte', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de la création du compte: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -90,10 +149,15 @@ class DatabaseService {
 
   Future<List<Prospect>> getProspects(int userId) async {
     try {
+      AppLogger.logRequest('PROSPECTS',
+          'SELECT * FROM Prospect WHERE id_utilisateur = ?', [userId]);
+
       final results = await _mysqlService.query(
         'SELECT * FROM Prospect WHERE id_utilisateur = ? ORDER BY date_creation DESC',
         [userId],
       );
+
+      AppLogger.logResponse('PROSPECTS', results.length);
 
       return results
           .map(
@@ -116,12 +180,18 @@ class DatabaseService {
             ),
           )
           .toList();
-    } catch (e) {
-      throw Exception('Erreur lors de la récupération des prospects: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error(
+          'Erreur lors de la récupération des prospects', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de la récupération des prospects: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
-  Future<bool> createProspect(
+  Future<void> createProspect(
     int userId,
     String nom,
     String prenom,
@@ -134,6 +204,35 @@ class DatabaseService {
     String notes,
   ) async {
     try {
+      // Valider les données
+      final validationResult = Validators.validateProspect(
+        nom: nom,
+        prenom: prenom,
+        email: email,
+        telephone: telephone,
+        entreprise: entreprise,
+      );
+
+      if (!validationResult.isValid) {
+        throw ValidationException(
+          message: validationResult.error!,
+          code: 'INVALID_INPUT',
+        );
+      }
+
+      AppLogger.logRequest('CREATE_PROSPECT', 'INSERT INTO Prospect', [
+        nom,
+        prenom,
+        email,
+        telephone,
+        entreprise,
+        poste,
+        statut,
+        source,
+        notes,
+        userId,
+      ]);
+
       await _mysqlService.query(
         '''INSERT INTO Prospect 
            (nom, prenom, email, telephone, entreprise, poste, statut, source, notes, id_utilisateur, date_creation)
@@ -151,13 +250,21 @@ class DatabaseService {
           userId,
         ],
       );
-      return true;
-    } catch (e) {
-      throw Exception('Erreur lors de la création: $e');
+
+      AppLogger.success('Prospect "$prenom $nom" créé avec succès');
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.error('Erreur lors de la création du prospect', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de la création: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
-  Future<bool> updateProspect(int prospectId, Map<String, dynamic> data) async {
+  Future<void> updateProspect(int prospectId, Map<String, dynamic> data) async {
     try {
       final updates = <String>[];
       final values = <dynamic>[];
@@ -171,20 +278,35 @@ class DatabaseService {
 
       values.add(prospectId);
 
-      if (updates.isEmpty) return true;
+      if (updates.isEmpty) return;
+
+      AppLogger.logRequest('UPDATE_PROSPECT',
+          'UPDATE Prospect SET ${updates.join(", ")}', values);
 
       await _mysqlService.query(
         'UPDATE Prospect SET ${updates.join(", ")}, date_modification = NOW() WHERE id = ?',
         values,
       );
-      return true;
-    } catch (e) {
-      throw Exception('Erreur lors de la mise à jour: $e');
+
+      AppLogger.success('Prospect #$prospectId mis à jour');
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.error(
+          'Erreur lors de la mise à jour du prospect', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de la mise à jour: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
-  Future<bool> deleteProspect(int prospectId) async {
+  Future<void> deleteProspect(int prospectId) async {
     try {
+      AppLogger.logRequest(
+          'DELETE_PROSPECT', 'DELETE FROM Prospect WHERE id = ?', [prospectId]);
+
       await _mysqlService.query(
         'DELETE FROM Interaction WHERE id_prospect = ?',
         [prospectId],
@@ -192,9 +314,18 @@ class DatabaseService {
       await _mysqlService.query('DELETE FROM Prospect WHERE id = ?', [
         prospectId,
       ]);
-      return true;
-    } catch (e) {
-      throw Exception('Erreur lors de la suppression: $e');
+
+      AppLogger.success('Prospect #$prospectId supprimé');
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.error(
+          'Erreur lors de la suppression du prospect', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de la suppression: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -202,12 +333,17 @@ class DatabaseService {
 
   Future<List<Interaction>> getInteractions(int prospectId) async {
     try {
+      AppLogger.logRequest('INTERACTIONS',
+          'SELECT * FROM Interaction WHERE id_prospect = ?', [prospectId]);
+
       final results = await _mysqlService.query(
         '''SELECT * FROM Interaction 
            WHERE id_prospect = ? 
            ORDER BY date_interaction DESC''',
         [prospectId],
       );
+
+      AppLogger.logResponse('INTERACTIONS', results.length);
 
       return results
           .map(
@@ -224,12 +360,18 @@ class DatabaseService {
             ),
           )
           .toList();
-    } catch (e) {
-      throw Exception('Erreur lors de la récupération: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error(
+          'Erreur lors de la récupération des interactions', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de la récupération: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
-  Future<bool> createInteraction(
+  Future<void> createInteraction(
     int prospectId,
     int userId,
     String typeInteraction,
@@ -237,15 +379,39 @@ class DatabaseService {
     DateTime dateInteraction,
   ) async {
     try {
+      if (description.isEmpty) {
+        throw ValidationException(
+          message: 'La description est obligatoire',
+          code: 'EMPTY_DESCRIPTION',
+        );
+      }
+
+      AppLogger.logRequest('CREATE_INTERACTION', 'INSERT INTO Interaction', [
+        prospectId,
+        userId,
+        typeInteraction,
+        description,
+        dateInteraction,
+      ]);
+
       await _mysqlService.query(
         '''INSERT INTO Interaction 
            (id_prospect, id_utilisateur, type_interaction, description, date_interaction, date_creation)
            VALUES (?, ?, ?, ?, ?, NOW())''',
         [prospectId, userId, typeInteraction, description, dateInteraction],
       );
-      return true;
-    } catch (e) {
-      throw Exception('Erreur lors de la création: $e');
+
+      AppLogger.success('Interaction créée pour le prospect #$prospectId');
+    } on AppException {
+      rethrow;
+    } catch (e, stackTrace) {
+      AppLogger.error(
+          'Erreur lors de la création de l\'interaction', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur lors de la création: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -253,6 +419,11 @@ class DatabaseService {
 
   Future<List<ProspectStats>> getProspectStats(int userId) async {
     try {
+      AppLogger.logRequest(
+          'STATS',
+          'SELECT statut, COUNT(*) FROM Prospect WHERE id_utilisateur = ?',
+          [userId]);
+
       final results = await _mysqlService.query(
         '''SELECT statut, COUNT(*) as count 
            FROM Prospect 
@@ -260,6 +431,8 @@ class DatabaseService {
            GROUP BY statut''',
         [userId],
       );
+
+      AppLogger.logResponse('STATS', results.length);
 
       return results
           .map(
@@ -269,13 +442,22 @@ class DatabaseService {
             ),
           )
           .toList();
-    } catch (e) {
-      throw Exception('Erreur: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error(
+          'Erreur lors de la récupération des statistiques', e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
   }
 
   Future<ConversionStats> getConversionStats(int userId) async {
     try {
+      AppLogger.logRequest('CONVERSION_STATS',
+          'SELECT COUNT(*), SUM(...) FROM Prospect', [userId]);
+
       final results = await _mysqlService.query(
         '''SELECT 
              COUNT(*) as total,
@@ -290,19 +472,21 @@ class DatabaseService {
       final converted = row['converted'] as int? ?? 0;
       final rate = total > 0 ? converted / total : 0.0;
 
+      AppLogger.success('Conversion rate: ${(rate * 100).toStringAsFixed(2)}%');
+
       return ConversionStats(
         totalProspects: total,
         convertedClients: converted,
         conversionRate: rate,
       );
-    } catch (e) {
-      throw Exception('Erreur: $e');
+    } catch (e, stackTrace) {
+      AppLogger.error('Erreur lors de la récupération des stats de conversion',
+          e, stackTrace);
+      throw DatabaseException(
+        message: 'Erreur: $e',
+        originalException: e as Exception,
+        stackTrace: stackTrace,
+      );
     }
-  }
-
-  // Helper pour vérifier le mot de passe
-  bool _verifyPassword(String password, String hash) {
-    // Implémentation simple - améliore selon tes besoins
-    return sha256.convert(utf8.encode(password)).toString() == hash;
   }
 }
