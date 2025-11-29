@@ -180,7 +180,7 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedStatut,
+                initialValue: _selectedStatut,
                 onChanged: (value) {
                   setState(() {
                     _selectedStatut = value ?? 'En cours';
