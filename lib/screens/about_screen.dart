@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
+import 'package:process/process.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({Key? key}) : super(key: key);
 
   Future<void> _launchURL(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
+    try {
+      if (Platform.isLinux) {
+        // Use xdg-open on Linux
+        await Process.run('xdg-open', [url]);
+      } else if (Platform.isMacOS) {
+        // Use open on macOS
+        await Process.run('open', [url]);
+      } else if (Platform.isWindows) {
+        // Use start on Windows
+        await Process.run('start', [url], runInShell: true);
+      }
+    } catch (e) {
+      debugPrint('Error launching URL: $e');
     }
   }
 
@@ -238,8 +250,12 @@ class AboutScreen extends StatelessWidget {
           // Avatar
           CircleAvatar(
             radius: 28,
-            backgroundImage: NetworkImage(avatarUrl),
             backgroundColor: Colors.blue[100],
+            backgroundImage:
+                avatarUrl.isNotEmpty ? NetworkImage(avatarUrl) : null,
+            child: avatarUrl.isEmpty
+                ? Icon(Icons.business, size: 24, color: Colors.blue[600])
+                : null,
           ),
           const SizedBox(width: 16),
           // Organization Info
@@ -291,29 +307,30 @@ class AboutScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: avatarUrl != null ? Colors.blue[50] : Colors.grey[50],
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(
+          color: avatarUrl != null ? Colors.blue[200]! : Colors.grey[300]!,
+        ),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Avatar
-          if (avatarUrl != null)
+          if (avatarUrl != null && avatarUrl!.isNotEmpty)
             CircleAvatar(
-              radius: 24,
-              backgroundImage: NetworkImage(avatarUrl),
-              backgroundColor: Colors.grey[200],
-              onBackgroundImageError: (exception, stackTrace) {},
-              child: Icon(Icons.person, color: Colors.grey[600]),
+              radius: 32,
+              backgroundColor: Colors.blue[100],
+              backgroundImage: NetworkImage(avatarUrl!),
+              child: Icon(Icons.person, color: Colors.blue[600], size: 32),
             )
           else
             CircleAvatar(
-              radius: 24,
+              radius: 32,
               backgroundColor: Colors.grey[200],
-              child: Icon(Icons.people, color: Colors.grey[600]),
+              child: Icon(Icons.people, color: Colors.grey[600], size: 32),
             ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           // Developer Info
           Expanded(
             child: Column(
@@ -322,7 +339,8 @@ class AboutScreen extends StatelessWidget {
                 Text(
                   name,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
                       ),
                 ),
                 const SizedBox(height: 4),
@@ -330,22 +348,27 @@ class AboutScreen extends StatelessWidget {
                   role,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
                       ),
                 ),
+                if (profileUrl != null) ...[
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    child: TextButton.icon(
+                      onPressed: () => _launchURL(profileUrl),
+                      icon: const Icon(Icons.open_in_new, size: 16),
+                      label: const Text('Voir le profil'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-          if (profileUrl != null) ...[
-            const SizedBox(width: 8),
-            TextButton.icon(
-              onPressed: () => _launchURL(profileUrl),
-              icon: const Icon(Icons.open_in_new, size: 18),
-              label: const Text('Profil'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.blue,
-              ),
-            ),
-          ],
         ],
       ),
     );
