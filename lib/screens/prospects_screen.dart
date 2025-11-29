@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/prospect.dart';
 import '../providers/auth_provider.dart';
 import '../providers/prospect_provider.dart';
 import 'add_prospect_screen.dart';
@@ -95,7 +96,7 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
     );
   }
 
-  Widget _buildProspectCard(BuildContext context, dynamic prospect,
+  Widget _buildProspectCard(BuildContext context, Prospect prospect,
       ProspectProvider prospectProvider) {
     return GestureDetector(
       onTap: () {
