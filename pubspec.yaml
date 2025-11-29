@@ -36,6 +36,9 @@ dependencies:
   # URL Launcher
   url_launcher: ^6.2.0
 
+  # Process execution
+  process: ^5.0.0
+
   # Charts
   fl_chart: ^0.65.0
 
