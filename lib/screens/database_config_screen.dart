@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/mysql_service.dart';
-import 'login_screen.dart';
 
 class DatabaseConfigScreen extends StatefulWidget {
   const DatabaseConfigScreen({Key? key}) : super(key: key);
@@ -139,7 +138,7 @@ class _DatabaseConfigScreenState extends State<DatabaseConfigScreen> {
                   controller: _databaseController,
                   decoration: InputDecoration(
                     labelText: 'Base de données',
-                    prefixIcon: const Icon(Icons.database),
+                    prefixIcon: const Icon(Icons.storage),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -157,7 +156,7 @@ class _DatabaseConfigScreenState extends State<DatabaseConfigScreen> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error, color: Colors.red[700]),
+                        Icon(Icons.warning, color: Colors.red[700]),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
