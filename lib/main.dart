@@ -7,6 +7,7 @@ import 'screens/database_config_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/prospects_screen.dart';
 import 'screens/stats_screen.dart';
+import 'widgets/sidebar_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +50,9 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   void initState() {
     super.initState();
-    _checkAuth();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAuth();
+    });
   }
 
   Future<void> _checkAuth() async {
@@ -82,23 +85,33 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _getScreen(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
+      drawer: SidebarNavigation(
+        selectedIndex: _selectedIndex,
+        onItemSelected: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Prospects'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart),
-            label: 'Statistiques',
-          ),
-        ],
       ),
+      appBar: AppBar(
+        title: Text(_getTitleForIndex(_selectedIndex)),
+        elevation: 0,
+      ),
+      body: _getScreen(_selectedIndex),
     );
+  }
+
+  String _getTitleForIndex(int index) {
+    switch (index) {
+      case 0:
+        return 'Prospects';
+      case 1:
+        return 'Statistiques';
+      case 2:
+        return 'Configuration';
+      default:
+        return 'Prospectius';
+    }
   }
 
   Widget _getScreen(int index) {
@@ -107,6 +120,10 @@ class _MainScreenState extends State<MainScreen> {
         return const ProspectsScreen();
       case 1:
         return const StatsScreen();
+      case 2:
+        return const Center(
+          child: Text('Bientôt disponible'),
+        );
       default:
         return const ProspectsScreen();
     }
