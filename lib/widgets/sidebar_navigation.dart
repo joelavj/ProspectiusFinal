@@ -88,6 +88,12 @@ class SidebarNavigation extends StatelessWidget {
                     label: 'Statistiques',
                     index: 1,
                   ),
+                  _buildNavItem(
+                    context,
+                    icon: Icons.download,
+                    label: 'Exporter',
+                    index: 2,
+                  ),
                   const Divider(
                     height: 16,
                   ),
@@ -95,7 +101,7 @@ class SidebarNavigation extends StatelessWidget {
                     context,
                     icon: Icons.settings,
                     label: 'Configuration',
-                    index: 2,
+                    index: 3,
                   ),
                 ],
               ),
