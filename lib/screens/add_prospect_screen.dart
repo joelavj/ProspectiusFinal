@@ -20,7 +20,7 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
   late TextEditingController _telephoneController;
   late TextEditingController _adresseController;
   late TextEditingController _interactionNoteController;
-  String _selectedType = 'prospect';
+  String _selectedType = 'particulier';
   String _selectedStatus = 'nouveau';
   String _selectedInteractionType = 'appel';
 
@@ -41,7 +41,7 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
       text: widget.prospect?.adresse ?? '',
     );
     _interactionNoteController = TextEditingController();
-    _selectedType = widget.prospect?.type ?? 'prospect';
+    _selectedType = widget.prospect?.type ?? 'particulier';
     _selectedStatus = widget.prospect?.status ?? 'nouveau';
   }
 
@@ -176,10 +176,10 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
                 initialValue: _selectedType,
                 onChanged: (value) {
                   setState(() {
-                    _selectedType = value ?? 'prospect';
+                    _selectedType = value ?? 'particulier';
                   });
                 },
-                items: ['prospect', 'client', 'fournisseur']
+                items: ['particulier', 'societe', 'organisation']
                     .map(
                       (type) =>
                           DropdownMenuItem(value: type, child: Text(type)),
