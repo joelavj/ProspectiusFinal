@@ -80,101 +80,110 @@ class AboutScreen extends StatelessWidget {
                 const SizedBox(height: 48),
 
                 // Organization Card
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Géré par',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildOrganizationCard(
-                          context,
-                          name: 'APEXNova Labs',
-                          description:
-                              'Developer team operating on software and mobile application development',
-                          avatarUrl:
-                              'https://avatars.githubusercontent.com/u/153268131?v=4',
-                          organizationUrl: 'https://github.com/APEXNovaLabs',
-                        ),
-                      ],
+                SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Géré par',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildOrganizationCard(
+                            context,
+                            name: 'APEXNova Labs',
+                            description:
+                                'Developer team operating on software and mobile application development',
+                            avatarUrl:
+                                'https://avatars.githubusercontent.com/u/153268131?v=4',
+                            organizationUrl: 'https://github.com/APEXNovaLabs',
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
 
                 // Description
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'À propos',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Prospectius est une application CRM moderne conçue pour faciliter la gestion efficace de vos prospects. '
-                          'Elle vous permet de suivre, organiser et analyser vos prospects avec une interface intuitive et des outils puissants.\n\n'
-                          'Avec Prospectius, vous pouvez:\n'
-                          '• Gérer vos prospects et interactions\n'
-                          '• Suivre le statut de chaque prospect\n'
-                          '• Analyser vos statistiques de conversion\n'
-                          '• Exporter vos données en Excel\n'
-                          '• Synchroniser avec une base de données MySQL',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
+                SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'À propos',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Prospectius est une application CRM moderne conçue pour faciliter la gestion efficace de vos prospects. '
+                            'Elle vous permet de suivre, organiser et analyser vos prospects avec une interface intuitive et des outils puissants.\n\n'
+                            'Avec Prospectius, vous pouvez:\n'
+                            '• Gérer vos prospects et interactions\n'
+                            '• Suivre le statut de chaque prospect\n'
+                            '• Analyser vos statistiques de conversion\n'
+                            '• Exporter vos données en Excel\n'
+                            '• Synchroniser avec une base de données MySQL',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 32),
 
                 // Developers
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Développé par',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        _buildDeveloperCard(
-                          context,
-                          name: 'Josoa VONJINIAINA',
-                          role: 'Développeur Principal',
-                          avatarUrl:
-                              'https://avatars.githubusercontent.com/u/josoavj?v=4',
-                          profileUrl: 'https://github.com/josoavj',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildDeveloperCard(
-                          context,
-                          name: 'Collaborateurs',
-                          role: 'Conception et Feedback',
-                          profileUrl: null,
-                        ),
-                      ],
+                SizedBox(
+                  width: double.infinity,
+                  child: Card(
+                    elevation: 2,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Développé par',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 16),
+                          _buildDeveloperCard(
+                            context,
+                            name: 'Josoa VONJINIAINA',
+                            role: 'Développeur Principal',
+                            avatarUrl:
+                                'https://avatars.githubusercontent.com/u/josoavj?v=4',
+                            profileUrl: 'https://github.com/josoavj',
+                          ),
+                          const SizedBox(height: 12),
+                          _buildDeveloperCard(
+                            context,
+                            name: 'Collaborateurs',
+                            role: 'Conception et Feedback',
+                            profileUrl: null,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
