@@ -240,40 +240,4 @@ class _StatsScreenState extends State<StatsScreen> {
       ),
     );
   }
-
-  Widget _buildStatItem(BuildContext context, String status, int count) {
-    final colors = {
-      'nouveau': Colors.blue,
-      'interesse': Colors.amber,
-      'negociation': Colors.orange,
-      'converti': Colors.green,
-      'perdu': Colors.red,
-    };
-
-    final color = colors[status] ?? Colors.grey;
-
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 12),
-            Expanded(child: Text(status)),
-            Text(
-              count.toString(),
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
