@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/prospect.dart';
 import '../models/interaction.dart';
 import '../services/database_service.dart';
+import '../utils/exception_handler.dart';
+import '../utils/app_logger.dart';
 
 class ProspectProvider extends ChangeNotifier {
   List<Prospect> _prospects = [];
@@ -25,8 +27,14 @@ class ProspectProvider extends ChangeNotifier {
 
     try {
       _prospects = await _databaseService.getProspects(userId);
-    } catch (e) {
+      AppLogger.success('${_prospects.length} prospect(s) chargé(s)');
+    } on AppException catch (e) {
+      _error = e.message;
+      AppLogger.warning(
+          'Erreur lors du chargement des prospects: ${e.message}');
+    } catch (e, stackTrace) {
       _error = 'Erreur: $e';
+      AppLogger.error('Erreur lors du chargement des prospects', e, stackTrace);
     }
     _isLoading = false;
     notifyListeners();
@@ -61,11 +69,17 @@ class ProspectProvider extends ChangeNotifier {
         notes,
       );
 
-      _isLoading = false;
       await loadProspects(userId);
       return true;
-    } catch (e) {
+    } on AppException catch (e) {
+      _error = e.message;
+      AppLogger.warning('Erreur lors de la création: ${e.message}');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e, stackTrace) {
       _error = 'Erreur: $e';
+      AppLogger.error('Erreur lors de la création du prospect', e, stackTrace);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -82,11 +96,18 @@ class ProspectProvider extends ChangeNotifier {
 
     try {
       await _databaseService.updateProspect(prospectId, data);
-      _isLoading = false;
       await loadProspects(userId);
       return true;
-    } catch (e) {
+    } on AppException catch (e) {
+      _error = e.message;
+      AppLogger.warning('Erreur lors de la mise à jour: ${e.message}');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e, stackTrace) {
       _error = 'Erreur: $e';
+      AppLogger.error(
+          'Erreur lors de la mise à jour du prospect', e, stackTrace);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -99,11 +120,18 @@ class ProspectProvider extends ChangeNotifier {
 
     try {
       await _databaseService.deleteProspect(prospectId);
-      _isLoading = false;
       await loadProspects(userId);
       return true;
-    } catch (e) {
+    } on AppException catch (e) {
+      _error = e.message;
+      AppLogger.warning('Erreur lors de la suppression: ${e.message}');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    } catch (e, stackTrace) {
       _error = 'Erreur: $e';
+      AppLogger.error(
+          'Erreur lors de la suppression du prospect', e, stackTrace);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -116,8 +144,15 @@ class ProspectProvider extends ChangeNotifier {
 
     try {
       _interactions = await _databaseService.getInteractions(prospectId);
-    } catch (e) {
+      AppLogger.success('${_interactions.length} interaction(s) chargée(s)');
+    } on AppException catch (e) {
+      _error = e.message;
+      AppLogger.warning(
+          'Erreur lors du chargement des interactions: ${e.message}');
+    } catch (e, stackTrace) {
       _error = 'Erreur: $e';
+      AppLogger.error(
+          'Erreur lors du chargement des interactions', e, stackTrace);
     }
     _isLoading = false;
     notifyListeners();
@@ -140,9 +175,17 @@ class ProspectProvider extends ChangeNotifier {
       );
 
       await loadInteractions(prospectId);
+      AppLogger.success('Interaction créée avec succès');
       return true;
-    } catch (e) {
+    } on AppException catch (e) {
+      _error = e.message;
+      AppLogger.warning('Erreur lors de la création: ${e.message}');
+      notifyListeners();
+      return false;
+    } catch (e, stackTrace) {
       _error = 'Erreur: $e';
+      AppLogger.error(
+          'Erreur lors de la création de l\'interaction', e, stackTrace);
       notifyListeners();
       return false;
     }
