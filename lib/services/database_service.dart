@@ -51,7 +51,7 @@ class DatabaseService {
       }
 
       final user = Account(
-        id: row['id_compte'] as int,
+        id: (row['id_compte'] as num).toInt(),
         nom: row['nom'] as String,
         prenom: row['prenom'] as String,
         email: row['email'] as String,
@@ -162,7 +162,7 @@ class DatabaseService {
       return results
           .map(
             (row) => Prospect(
-              id: row['id_prospect'] as int,
+              id: (row['id_prospect'] as num).toInt(),
               nom: row['nomp'] as String? ?? '',
               prenom: row['prenomp'] as String? ?? '',
               email: row['email'] as String? ?? '',
@@ -172,7 +172,7 @@ class DatabaseService {
               status: row['status'] as String? ?? 'nouveau',
               creation: DateTime.parse(row['creation'].toString()),
               dateUpdate: DateTime.parse(row['date_update'].toString()),
-              assignation: row['assignation'] as int? ?? 0,
+              assignation: (row['assignation'] as num?)?.toInt() ?? 0,
             ),
           )
           .toList();
@@ -328,9 +328,9 @@ class DatabaseService {
       return results
           .map(
             (row) => Interaction(
-              id: row['id_interaction'] as int,
-              idProspect: row['id_prospect'] as int,
-              idCompte: row['id_compte'] as int,
+              id: (row['id_interaction'] as num).toInt(),
+              idProspect: (row['id_prospect'] as num).toInt(),
+              idCompte: (row['id_compte'] as num).toInt(),
               type: row['type'] as String,
               note: row['note'] as String,
               dateInteraction: DateTime.parse(
@@ -417,7 +417,7 @@ class DatabaseService {
           .map(
             (row) => ProspectStats(
               status: row['status'] as String,
-              count: row['count'] as int,
+              count: (row['count'] as num).toInt(),
             ),
           )
           .toList();
@@ -447,8 +447,8 @@ class DatabaseService {
       );
 
       final row = results.first;
-      final total = row['total'] as int;
-      final converted = row['converted'] as int? ?? 0;
+      final total = (row['total'] as num).toInt();
+      final converted = (row['converted'] as num?)?.toInt() ?? 0;
       final rate = total > 0 ? converted / total : 0.0;
 
       AppLogger.success('Conversion rate: ${(rate * 100).toStringAsFixed(2)}%');
