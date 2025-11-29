@@ -75,8 +75,8 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
           return GridView.builder(
             padding: const EdgeInsets.all(12),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 0.85,
+              crossAxisCount: 3,
+              childAspectRatio: 1.0,
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
             ),
@@ -96,6 +96,8 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
               )
               .then((_) => _loadProspects());
         },
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Nouveau prospect'),
       ),
@@ -114,208 +116,77 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
         );
       },
       child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        elevation: 2,
+        elevation: 1,
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // En-tête avec nom et statut
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Colors.blue[100],
-                    child: Text(
-                      prospect.prenom.isNotEmpty
-                          ? prospect.prenom[0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
+              // Avatar
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.blue[100],
+                child: Text(
+                  prospect.prenom.isNotEmpty
+                      ? prospect.prenom[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          prospect.fullName,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          prospect.type.capitalize(),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Chip(
-                    label: Text(
-                      prospect.status.capitalize(),
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    backgroundColor: _getStatusColor(prospect.status),
-                    labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-                    padding: const EdgeInsets.all(4),
-                  ),
-                ],
+                ),
               ),
-              const SizedBox(height: 12),
-              const Divider(),
               const SizedBox(height: 8),
-              // Informations de contact
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Email',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          prospect.email.isEmpty
-                              ? 'Non renseigné'
-                              : prospect.email,
-                          style: const TextStyle(fontSize: 12),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Téléphone',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          prospect.telephone.isEmpty
-                              ? 'Non renseigné'
-                              : prospect.telephone,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+
+              // Name
+              Text(
+                prospect.fullName,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(height: 12),
-              // Interaction récente
-              FutureBuilder<String?>(
-                future: _getLastInteractionNote(prospect.id),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const SizedBox(
-                          height: 40,
-                          child: Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }
+              const SizedBox(height: 4),
 
-                  final lastNote = snapshot.data;
-                  if (lastNote == null || lastNote.isEmpty) {
-                    return Text(
-                      'Aucune interaction enregistrée',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[500],
-                        fontStyle: FontStyle.italic,
-                      ),
-                    );
-                  }
+              // Type
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  borderRadius: BorderRadius.circular(3),
+                ),
+                child: Text(
+                  prospect.type.capitalize(),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
 
-                  return Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.blue[200]!, width: 1),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Dernière note',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.blue[700],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          lastNote,
-                          style: const TextStyle(fontSize: 12),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  );
-                },
+              // Status
+              Chip(
+                label: Text(
+                  prospect.status.capitalize(),
+                  style: const TextStyle(
+                      fontSize: 10, fontWeight: FontWeight.w500),
+                ),
+                backgroundColor: _getStatusColor(prospect.status),
+                labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.all(2),
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  Future<String?> _getLastInteractionNote(int prospectId) async {
-    try {
-      final prospectProvider = context.read<ProspectProvider>();
-      await prospectProvider.loadInteractions(prospectId);
-      if (prospectProvider.interactions.isNotEmpty) {
-        return prospectProvider.interactions.last.note;
-      }
-      return null;
-    } catch (e) {
-      return null;
-    }
   }
 
   Color _getStatusColor(String status) {
