@@ -235,8 +235,6 @@ class AboutScreen extends StatelessWidget {
             radius: 28,
             backgroundImage: NetworkImage(avatarUrl),
             backgroundColor: Colors.blue[100],
-            onBackgroundImageError: (exception, stackTrace) {},
-            child: Icon(Icons.organization, color: Colors.blue[600]),
           ),
           const SizedBox(width: 16),
           // Organization Info
