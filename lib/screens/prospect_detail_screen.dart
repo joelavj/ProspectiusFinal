@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/prospect.dart';
 import '../providers/auth_provider.dart';
 import '../providers/prospect_provider.dart';
-import 'add_prospect_screen.dart';
+import 'edit_prospect_screen.dart';
 
 class ProspectDetailScreen extends StatefulWidget {
   final Prospect prospect;
@@ -16,83 +16,18 @@ class ProspectDetailScreen extends StatefulWidget {
 }
 
 class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
-  final _descriptionController = TextEditingController();
-  String _selectedType = 'Appel';
   late Prospect _currentProspect;
 
   @override
   void initState() {
     super.initState();
     _currentProspect = widget.prospect;
-    _loadInteractions();
+    _loadData();
   }
 
-  void _loadInteractions() {
+  void _loadData() {
     final prospectProvider = context.read<ProspectProvider>();
     prospectProvider.loadInteractions(_currentProspect.id);
-  }
-
-  void _handleAddInteraction() async {
-    final authProvider = context.read<AuthProvider>();
-    final prospectProvider = context.read<ProspectProvider>();
-
-    if (authProvider.currentUser == null) return;
-
-    await prospectProvider.createInteraction(
-      _currentProspect.id,
-      authProvider.currentUser!.id,
-      _selectedType,
-      _descriptionController.text,
-      DateTime.now(),
-    );
-
-    _descriptionController.clear();
-    _loadInteractions();
-  }
-
-  void _changeStatus(String newStatus) async {
-    final authProvider = context.read<AuthProvider>();
-    final prospectProvider = context.read<ProspectProvider>();
-
-    if (authProvider.currentUser == null) return;
-
-    final success = await prospectProvider.updateProspect(
-      authProvider.currentUser!.id,
-      _currentProspect.id,
-      {
-        'nomp': _currentProspect.nom,
-        'prenomp': _currentProspect.prenom,
-        'email': _currentProspect.email,
-        'telephone': _currentProspect.telephone,
-        'adresse': _currentProspect.adresse,
-        'type': _currentProspect.type,
-        'status': newStatus,
-      },
-    );
-
-    if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Statut changé en: $newStatus'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      // Mettre à jour le prospect local
-      _currentProspect = Prospect(
-        id: _currentProspect.id,
-        nom: _currentProspect.nom,
-        prenom: _currentProspect.prenom,
-        email: _currentProspect.email,
-        telephone: _currentProspect.telephone,
-        adresse: _currentProspect.adresse,
-        type: _currentProspect.type,
-        status: newStatus,
-        creation: _currentProspect.creation,
-        dateUpdate: DateTime.now(),
-        assignation: _currentProspect.assignation,
-      );
-      setState(() {});
-    }
   }
 
   void _handleDelete() async {
@@ -130,9 +65,25 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
     }
   }
 
+  void _handleUpdate() {
+    Navigator.of(context)
+        .push(
+      MaterialPageRoute(
+        builder: (_) => EditProspectScreen(prospect: _currentProspect),
+      ),
+    )
+        .then((updatedProspect) {
+      if (updatedProspect != null && updatedProspect is Prospect) {
+        setState(() {
+          _currentProspect = updatedProspect;
+        });
+        _loadData();
+      }
+    });
+  }
+
   @override
   void dispose() {
-    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -145,30 +96,11 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
         actions: [
           PopupMenuButton(
             onSelected: (value) {
-              if (value == 'edit') {
-                Navigator.of(context)
-                    .push(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            AddProspectScreen(prospect: _currentProspect),
-                      ),
-                    )
-                    .then((_) => _loadInteractions());
-              } else if (value == 'delete') {
+              if (value == 'delete') {
                 _handleDelete();
               }
             },
             itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit),
-                    SizedBox(width: 8),
-                    Text('Éditer'),
-                  ],
-                ),
-              ),
               const PopupMenuItem(
                 value: 'delete',
                 child: Row(
@@ -217,31 +149,13 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
                             ],
                           ),
                         ),
-                        // Bouton pour changer le statut
-                        PopupMenuButton<String>(
-                          onSelected: (value) => _changeStatus(value),
-                          itemBuilder: (BuildContext context) => [
-                            'nouveau',
-                            'interesse',
-                            'negociation',
-                            'perdu',
-                            'converti'
-                          ]
-                              .map(
-                                (status) => PopupMenuItem(
-                                  value: status,
-                                  child: Text(status),
-                                ),
-                              )
-                              .toList(),
-                          child: Chip(
-                            label: Text(_currentProspect.status),
-                            backgroundColor: _getStatusColor(
-                              _currentProspect.status,
-                            ),
-                            labelPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                            ),
+                        Chip(
+                          label: Text(_currentProspect.status),
+                          backgroundColor: _getStatusColor(
+                            _currentProspect.status,
+                          ),
+                          labelPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
                           ),
                         ),
                       ],
@@ -256,11 +170,27 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
                       'Créé le',
                       '${_currentProspect.creation.day}/${_currentProspect.creation.month}/${_currentProspect.creation.year}',
                     ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: ElevatedButton.icon(
+                        onPressed: _handleUpdate,
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Mettre à jour'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue[700],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-            // Interactions
+            // Historique des interactions
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Align(
@@ -272,59 +202,6 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            // Formulaire d'ajout d'interaction
-            Card(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedType,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedType = value ?? 'Appel';
-                        });
-                      },
-                      items: ['Appel', 'Email', 'Réunion', 'Message']
-                          .map(
-                            (type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type),
-                            ),
-                          )
-                          .toList(),
-                      decoration: InputDecoration(
-                        labelText: 'Type d\'interaction',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _handleAddInteraction,
-                        child: const Text('Ajouter interaction'),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
             // Liste des interactions
             Consumer<ProspectProvider>(
               builder: (context, prospectProvider, _) {
