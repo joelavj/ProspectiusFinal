@@ -34,28 +34,29 @@
 ## ⚡ Installation Rapide
 
 ### Toutes les Plateformes
-\`\`\`bash
+
+```bash
 bash scripts/setup.sh
-\`\`\`
+```
 
 Ce script détecte votre OS et lance l'installation appropriée.
 
 ### Ou Manuellement
 
 **Linux:**
-\`\`\`bash
+```bash
 bash scripts/install-linux.sh
-\`\`\`
+```
 
 **macOS:**
-\`\`\`bash
+```bash
 bash scripts/install-macos.sh
-\`\`\`
+```
 
 **Windows (PowerShell):**
-\`\`\`powershell
+```powershell
 powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1
-\`\`\`
+```
 
 ## 📋 Prérequis
 
@@ -76,7 +77,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1
 ### 1. Installation de MariaDB
 
 #### Ubuntu/Debian
-\`\`\`bash
+```bash
 sudo apt update
 sudo apt install mariadb-server
 sudo mariadb-secure-installation
@@ -84,7 +85,7 @@ sudo mariadb-secure-installation
 # Démarrer le service
 sudo systemctl start mariadb
 sudo systemctl enable mariadb
-\`\`\`
+```
 
 #### Windows
 1. Télécharger depuis [mariadb.org](https://mariadb.org/download/)
@@ -93,54 +94,55 @@ sudo systemctl enable mariadb
 
 ### 2. Créer la base de données
 
-\`\`\`bash
+```bash
 # Cloner le repo du backend
 git clone https://github.com/josoavj/dbProspectius.git
 
 # Importer le schéma
 mysql -u root -p < dbProspectius/scriptSQL/Prospectius.sql
-\`\`\`
+```
 
 Ou manuellement:
-\`\`\`bash
+```bash
 mysql -u root -p
 # Dans le client MySQL:
 SOURCE /chemin/vers/Prospectius.sql;
 EXIT;
-\`\`\`
+```
 
 ### 3. Cloner et configurer Prospectius
 
-\`\`\`bash
+```bash
 git clone <repository-url>
 cd prospectius
 
 flutter pub get
 flutter config --enable-windows-desktop  # Pour Windows
 flutter config --enable-linux-desktop    # Pour Linux
-\`\`\`
+```
 
 ## 🚀 Lancement de l'application
 
 ### Windows
-\`\`\`bash
-# Mode debug
+```bash
+## Mode debug
 flutter run -d windows
 
-# Mode release
+## Mode release
+
 flutter build windows --release
-\`\`\`
+```
 
 L'exécutable sera à: `build/windows/x64/runner/Release/prospectius.exe`
 
 ### Linux
-\`\`\`bash
+```bash
 # Mode debug
 flutter run -d linux
 
 # Mode release
 flutter build linux --release
-\`\`\`
+```
 
 L'exécutable sera à: `build/linux/x64/release/prospectius`
 
@@ -155,7 +157,7 @@ Au premier lancement, configurez la connexion:
 
 ## 📁 Structure du projet
 
-\`\`\`
+```
 prospectius/
 ├── lib/                    # Code source Dart/Flutter
 │   ├── main.dart          # Point d'entrée
@@ -171,12 +173,13 @@ prospectius/
 ├── .github/workflows/     # CI/CD
 ├── pubspec.yaml          # Dépendances
 └── README.md             # Ce fichier
-\`\`\`
+```
 
 ## 🐛 Troubleshooting
 
 ### "MariaDB non connecté"
-\`\`\`bash
+
+```bash
 # Vérifier le statut
 sudo systemctl status mariadb  # Linux
 mysql.server status            # macOS
@@ -185,19 +188,20 @@ mysql.server status            # macOS
 # Redémarrer
 sudo systemctl restart mariadb  # Linux
 brew services restart mariadb   # macOS
-\`\`\`
+```
 
 ### "Base de données non trouvée"
-\`\`\`bash
+
+```bash
 mysql -u root -p -e "SHOW DATABASES;"
-\`\`\`
+```
 
 ### Problèmes de build
-\`\`\`bash
+```bash
 flutter clean
 flutter pub get
 flutter run -v
-\`\`\`
+```
 
 ## 📚 Scripts Utiles
 
