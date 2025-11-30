@@ -211,7 +211,7 @@ class SidebarNavigation extends StatelessWidget {
               onPressed: () {
                 Navigator.pop(context);
                 authProvider.logout();
-                Navigator.of(context).pushReplacementNamed('/config');
+                Navigator.of(context).pushReplacementNamed('/login');
               },
               child: const Text(
                 'Déconnexion',
