@@ -158,6 +158,52 @@ class _StatsScreenState extends State<StatsScreen> {
                         ),
                       ),
                     ),
+                  const SizedBox(height: 32),
+                  // Performances
+                  Text(
+                    'Performances',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 24),
+                  if (statsProvider.prospectStats.isNotEmpty)
+                    Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            _buildPerformanceMetric(
+                              context,
+                              'Taux de Conversion',
+                              _calculateConversionRate(statsProvider),
+                              Colors.green,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildPerformanceMetric(
+                              context,
+                              'Taux de Perte',
+                              _calculateLossRate(statsProvider),
+                              Colors.red,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildPerformanceMetric(
+                              context,
+                              'Taux d\'Engagement',
+                              _calculateEngagementRate(statsProvider),
+                              Colors.blue,
+                            ),
+                            const SizedBox(height: 16),
+                            _buildPerformanceMetric(
+                              context,
+                              'Prospects en Attente',
+                              _calculatePendingCount(statsProvider),
+                              Colors.orange,
+                              isCount: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -169,6 +215,113 @@ class _StatsScreenState extends State<StatsScreen> {
         child: const Icon(Icons.refresh),
       ),
     );
+  }
+
+  Widget _buildPerformanceMetric(
+    BuildContext context,
+    String label,
+    dynamic value,
+    Color color, {
+    bool isCount = false,
+  }) {
+    final displayValue =
+        isCount ? value.toString() : '${value.toStringAsFixed(1)}%';
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleSmall,
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color, width: 1.5),
+          ),
+          child: Text(
+            displayValue,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  double _calculateConversionRate(StatsProvider statsProvider) {
+    final total = statsProvider.prospectStats
+        .fold<int>(0, (sum, stat) => sum + stat.count);
+    if (total == 0) return 0;
+    final converted = statsProvider.prospectStats
+        .firstWhere((stat) => stat.status == 'converti',
+            orElse: () => statsProvider.prospectStats.first)
+        .count;
+    return statsProvider.prospectStats.any((stat) => stat.status == 'converti')
+        ? (converted / total) * 100
+        : 0;
+  }
+
+  double _calculateLossRate(StatsProvider statsProvider) {
+    final total = statsProvider.prospectStats
+        .fold<int>(0, (sum, stat) => sum + stat.count);
+    if (total == 0) return 0;
+    final lost = statsProvider.prospectStats
+        .firstWhere((stat) => stat.status == 'perdu',
+            orElse: () => statsProvider.prospectStats.first)
+        .count;
+    return statsProvider.prospectStats.any((stat) => stat.status == 'perdu')
+        ? (lost / total) * 100
+        : 0;
+  }
+
+  double _calculateEngagementRate(StatsProvider statsProvider) {
+    final total = statsProvider.prospectStats
+        .fold<int>(0, (sum, stat) => sum + stat.count);
+    if (total == 0) return 0;
+    final interested = statsProvider.prospectStats
+        .firstWhere((stat) => stat.status == 'interesse',
+            orElse: () => statsProvider.prospectStats.first)
+        .count;
+    final negotiating = statsProvider.prospectStats
+        .firstWhere((stat) => stat.status == 'negociation',
+            orElse: () => statsProvider.prospectStats.first)
+        .count;
+    final engaged = (statsProvider.prospectStats
+                .any((stat) => stat.status == 'interesse')
+            ? interested
+            : 0) +
+        (statsProvider.prospectStats.any((stat) => stat.status == 'negociation')
+            ? negotiating
+            : 0);
+    return (engaged / total) * 100;
+  }
+
+  int _calculatePendingCount(StatsProvider statsProvider) {
+    final total = statsProvider.prospectStats
+        .fold<int>(0, (sum, stat) => sum + stat.count);
+    final converted = statsProvider.prospectStats
+        .firstWhere((stat) => stat.status == 'converti',
+            orElse: () => statsProvider.prospectStats.first)
+        .count;
+    final lost = statsProvider.prospectStats
+        .firstWhere((stat) => stat.status == 'perdu',
+            orElse: () => statsProvider.prospectStats.first)
+        .count;
+    final convertedCount =
+        statsProvider.prospectStats.any((stat) => stat.status == 'converti')
+            ? converted
+            : 0;
+    final lostCount =
+        statsProvider.prospectStats.any((stat) => stat.status == 'perdu')
+            ? lost
+            : 0;
+    return total - convertedCount - lostCount;
   }
 
   List<PieChartSectionData> _buildPieSections(StatsProvider statsProvider) {
