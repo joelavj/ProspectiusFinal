@@ -26,6 +26,7 @@
 
 - **Authentification:** Connexion sécurisée avec MariaDB/MySQL
 - **Gestion des prospects:** Création, lecture, mise à jour et suppression de prospects
+- **Exploration avancée:** Recherche multi-critères, filtrage par catégorie et dates, tri personnalisé
 - **Suivi des interactions:** Enregistrement des appels, emails, réunions avec chaque prospect
 - **Gestion des clients:** Conversion des prospects en clients
 - **Statistiques et reporting:** Tableaux de bord et graphiques de conversion
@@ -165,7 +166,22 @@ prospectius/
 │   ├── services/          # Services (MySQL, Storage)
 │   ├── providers/         # Gestion d'état
 │   ├── screens/           # Écrans de l'application
+│   │   ├── exploration_screen.dart     # Recherche et filtrage avancés
+│   │   ├── prospects_screen.dart       # Gestion des prospects
+│   │   ├── stats_screen.dart          # Statistiques
+│   │   ├── clients_screen.dart        # Gestion des clients
+│   │   ├── export_prospects_screen.dart # Export données
+│   │   ├── profile_screen.dart        # Profil utilisateur
+│   │   ├── login_screen.dart          # Authentification
+│   │   ├── register_screen.dart       # Inscription
+│   │   ├── configuration_screen.dart  # Paramètres
+│   │   ├── database_config_screen.dart # Config BD
+│   │   ├── about_screen.dart          # À propos
+│   │   ├── add_prospect_screen.dart   # Ajouter prospect
+│   │   ├── edit_prospect_screen.dart  # Modifier prospect
+│   │   └── prospect_detail_screen.dart # Détails prospect
 │   ├── widgets/           # Widgets réutilisables
+│   │   └── sidebar_navigation.dart    # Menu latéral
 │   └── utils/             # Utilitaires
 ├── windows/               # Configuration Windows (C++)
 ├── linux/                 # Configuration Linux (C++)
@@ -213,9 +229,34 @@ flutter run -v
 - `scripts/download-sql.sh` - Télécharger le schéma SQL
 - `scripts/validate.sh` - Valider l'installation
 
-## 📖 Documentation Complète
+## 📚 Documentation Complète
 
 Voir [INSTALLATION.md](INSTALLATION.md) pour des instructions détaillées.
+
+### Pages et Fonctionnalités
+
+#### 🔍 Exploration (Nouvelle Fonctionnalité)
+- Recherche multi-critères en temps réel
+- Filtrage par catégorie (Entreprise, Particulier, Startup, PME, ETI)
+- Filtrage par plage de dates de création
+- Options de tri (plus récents/anciens, alphabétique, par statut)
+- Affichage détaillé des résultats avec contacts et informations
+
+#### 👥 Gestion des Prospects
+- Créer, modifier, consulter et supprimer des prospects
+- Enregistrement des informations de contact
+- Historique des interactions
+- Affichage du statut (Nouveau, En cours, Qualifié, Converti, Perdu)
+
+#### 📊 Statistiques
+- Tableaux de bord avec les indicateurs clés
+- Graphiques de conversion
+- Suivi des performances
+
+#### 💼 Gestion des Clients
+- Liste des prospects convertis en clients
+- Suivi des contrats
+- Historique commercial
 
 ## 👥 Équipe contributeur
 
