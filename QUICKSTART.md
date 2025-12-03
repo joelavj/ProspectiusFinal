@@ -1,59 +1,59 @@
 # 🚀 Prospectius - Démarrage Rapide
 
-Bienvenue dans **Prospectius**, une application CRM Flutter moderne pour Windows et Linux.
+Bienvenue dans **Prospectius**, une application CRM moderne pour Windows et Linux.
 
-## ⚡ Installation en 2 Étapes
+## ⚡ Installation Rapide
 
-### Étape 1: Télécharger et Préparer
+### Option 1: Depuis les Exécutables Compilés (Recommandé) ⭐
 
+**1. Téléchargez les fichiers:**
+- Rendez-vous sur la [page des releases](https://github.com/josoavj/ProspectiusFinal/releases/latest)
+- Téléchargez les fichiers pour votre système:
+  - **Windows:** `prospectius.exe`
+  - **Linux:** `prospectius`
+  - **Tous:** `Prospectius.sql` (script de base de données)
+
+**2. Installez MariaDB:**
+- [Windows](https://mariadb.org/download/)
+- [Linux Ubuntu/Debian](https://mariadb.org/download/#mariadb-repositories): `sudo apt install mariadb-server`
+- [Linux Fedora/RHEL](https://mariadb.org/download/#mariadb-repositories): `sudo dnf install mariadb-server`
+
+**3. Importez la base de données:**
 ```bash
-git clone <votre-repo-url>
-cd prospectius
+# Linux/macOS
+mysql -u root -proot < Prospectius.sql
+
+# Windows (dans PowerShell ou CMD)
+mysql -u root -proot < Prospectius.sql
 ```
 
-### Étape 2: Exécuter le Script d'Installation
+**4. Lancez l'application:**
+- **Windows:** Double-cliquez sur `prospectius.exe`
+- **Linux:** `./prospectius`
 
-**Sur Linux ou macOS:**
+### Option 2: Depuis les Scripts d'Installation
+
+**Sur Linux:**
 ```bash
-bash scripts/setup.sh
+git clone https://github.com/josoavj/ProspectiusFinal.git
+cd ProspectiusFinal
+bash scripts/install-linux.sh
 ```
 
 **Sur Windows (PowerShell):**
 ```powershell
+git clone https://github.com/josoavj/ProspectiusFinal.git
+cd ProspectiusFinal
 powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1
 ```
 
-C'est tout ! Le script s'occupe de:
-- ✅ Vérifier/installer MariaDB
-- ✅ Importer la base de données
-- ✅ Installer les dépendances Flutter
-- ✅ Afficher les instructions de lancement
-
----
-
-## 📱 Lancer l'Application
-
-Après installation:
-
-```bash
-flutter run
-```
-
-Pour Windows spécifiquement:
-```bash
-flutter run -d windows
-```
-
-Pour Linux spécifiquement:
-```bash
-flutter run -d linux
-```
+Les scripts téléchargeront automatiquement les fichiers et configureront la base de données.
 
 ---
 
 ## 🔐 Premier Accès
 
-Une fois l'app lancée:
+Une fois l'application lancée:
 
 ### 1. Configuration de la Base de Données
 À la première exécution, vous devrez configurer la connexion:
@@ -66,17 +66,33 @@ Password: root
 Database: Prospectius
 ```
 
-### 2. Connexion
-Utilisez les identifiants par défaut:
-
-```
-Username: admin
-Password: admin
-```
+### 2. Créer un Compte
+- Cliquez sur le bouton **"S'inscrire"**
+- Remplissez le formulaire avec vos informations
+- Complétez l'inscription
+- Vous pourrez alors vous connecter avec vos identifiants
 
 ---
 
 ## ❓ Besoin d'Aide?
+
+### Pour les Développeurs (Construction depuis les sources)
+
+Si vous voulez compiler depuis le code source:
+
+```bash
+# Cloner le projet
+git clone https://github.com/josoavj/ProspectiusFinal.git
+cd ProspectiusFinal
+
+# Installer les dépendances
+flutter pub get
+
+# Compiler pour votre plateforme
+flutter build windows   # Windows
+flutter build linux     # Linux
+flutter build macos     # macOS
+```
 
 ### Validation de l'Installation
 ```bash
@@ -90,7 +106,7 @@ Cela affiche un diagnostic complet du système.
 bash scripts/clean.sh
 ```
 
-Nettoie les caches et réinstalle les dépendances.
+Nettoie les caches et réinstalle les dépendances (pour développeurs).
 
 ### Documentation Complète
 
@@ -152,13 +168,16 @@ mysql -u root -proot < scripts/prospectius.sql
 
 | Plateforme | Req. Minimum | Recommandé |
 |-----------|-------------|-----------|
-| **Windows** | 8.1+ | Windows 10+ |
-| **Linux** | Ubuntu 18.04+ | Ubuntu 22.04+ |
+| **Windows** | Windows 8.1+ | Windows 10+ (64-bit) |
+| **Linux** | Ubuntu 18.04+ | Ubuntu 22.04+ (64-bit) |
 | **macOS** | 10.11+ | 12.0+ |
 
-**Logiciels:**
+**Logiciels requis:**
+- **MariaDB 10.3+** ou **MySQL 5.7+**
+
+**Pour les développeurs:**
 - Flutter 3.16.0+
-- MariaDB 10.3+ ou MySQL 5.7+
+- Dart 3.0.0+
 
 ---
 
