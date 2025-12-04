@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../utils/exception_handler.dart';
 import '../utils/app_logger.dart';
+import 'migration_service.dart';
 
 class MySQLConfig {
   final String host;
@@ -65,6 +66,7 @@ class MySQLService {
   dynamic _connection;
   MySQLConfig _config = MySQLConfig.fromDefaults();
   bool _isConnected = false;
+  MigrationService? _migrationService;
 
   factory MySQLService() {
     return _instance;
@@ -74,6 +76,7 @@ class MySQLService {
 
   bool get isConnected => _isConnected;
   MySQLConfig get config => _config;
+  MigrationService? get migrationService => _migrationService;
 
   /// Obtient la connexion MySQL (usage interne pour transactions)
   dynamic getConnection() {
@@ -131,8 +134,21 @@ class MySQLService {
         config.toConnectionSettings(),
       );
       _isConnected = true;
+
+      // Initialiser le service de migrations
+      _migrationService = MigrationService(_connection);
+
       await saveConfig(config);
       AppLogger.success('Connexion MySQL établie');
+
+      // Exécuter les migrations en attente
+      try {
+        await _migrationService!.runPendingMigrations();
+      } catch (e) {
+        AppLogger.warning('Erreur lors de l\'exécution des migrations: $e');
+        // Continuer même si les migrations échouent
+      }
+
       return true;
     } on ConnectionException {
       _isConnected = false;
