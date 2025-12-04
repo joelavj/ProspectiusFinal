@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/prospect.dart';
 import '../models/interaction.dart';
 import '../services/database_service.dart';
+import '../services/error_handling_service.dart';
 import '../utils/exception_handler.dart';
 import '../utils/app_logger.dart';
 
@@ -26,8 +27,15 @@ class ProspectProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _prospects = await _databaseService.getProspects(userId);
+      _prospects = await ErrorHandlingService.executeWithTimeout(
+        () => _databaseService.getProspects(userId),
+        operationName: 'Chargement des prospects',
+        timeout: ErrorHandlingService.defaultTimeout,
+      );
       AppLogger.success('${_prospects.length} prospect(s) chargé(s)');
+    } on TimeoutException catch (e) {
+      _error = 'Timeout: ${e.message}';
+      AppLogger.error('Timeout lors du chargement', null);
     } on AppException catch (e) {
       _error = e.message;
       AppLogger.warning(
