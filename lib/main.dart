@@ -16,6 +16,7 @@ import 'screens/clients_screen.dart';
 import 'screens/configuration_screen.dart';
 import 'screens/exploration_screen.dart';
 import 'screens/audit_transfer_screen.dart';
+import 'screens/logs_viewer_screen.dart';
 import 'widgets/sidebar_navigation.dart';
 import 'services/mysql_service.dart';
 import 'services/logging_service.dart';
@@ -179,6 +180,8 @@ class _MainScreenState extends State<MainScreen> {
         return 'Profil';
       case 7:
         return 'Paramètres';
+      case 8:
+        return 'Logs';
       default:
         return 'Prospectius';
     }
@@ -202,6 +205,8 @@ class _MainScreenState extends State<MainScreen> {
         return const ProfileScreen();
       case 7:
         return const ConfigurationScreen();
+      case 8:
+        return const LogsViewerScreen();
       default:
         return const ProspectsScreen();
     }
