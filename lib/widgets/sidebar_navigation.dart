@@ -125,6 +125,12 @@ class SidebarNavigation extends StatelessWidget {
                     label: 'Paramètres',
                     index: 7,
                   ),
+                  _buildNavItem(
+                    context,
+                    icon: Icons.description,
+                    label: 'Logs',
+                    index: 8,
+                  ),
                 ],
               ),
             ),

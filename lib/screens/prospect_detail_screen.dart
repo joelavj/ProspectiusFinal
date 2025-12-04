@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/prospect.dart';
 import '../providers/auth_provider.dart';
 import '../providers/prospect_provider.dart';
+import '../widgets/data_state_widget.dart';
 import '../utils/text_formatter.dart';
 import 'edit_prospect_screen.dart';
 
@@ -102,9 +103,24 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
             onSelected: (value) {
               if (value == 'delete') {
                 _handleDelete();
+              } else if (value == 'audit') {
+                Navigator.of(context).pushNamed(
+                  '/audit_transfer',
+                  arguments: _currentProspect.id,
+                );
               }
             },
             itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'audit',
+                child: Row(
+                  children: [
+                    Icon(Icons.history, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('Audit et transferts'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'delete',
                 child: Row(
@@ -211,39 +227,44 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
             // Liste des interactions
             Consumer<ProspectProvider>(
               builder: (context, prospectProvider, _) {
-                if (prospectProvider.interactions.isEmpty) {
-                  return Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Text(
-                      'Aucune interaction',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  );
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: prospectProvider.interactions.length,
-                  itemBuilder: (context, index) {
-                    final interaction = prospectProvider.interactions[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          _getInteractionIcon(interaction.type),
+                return SimpleStateBuilder(
+                  isLoading: prospectProvider.isLoading,
+                  error: prospectProvider.error,
+                  child: prospectProvider.interactions.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Text(
+                            'Aucune interaction',
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        )
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: prospectProvider.interactions.length,
+                          itemBuilder: (context, index) {
+                            final interaction =
+                                prospectProvider.interactions[index];
+                            return Card(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 4,
+                              ),
+                              child: ListTile(
+                                leading: Icon(
+                                  _getInteractionIcon(interaction.type),
+                                ),
+                                title: Text(
+                                    TextFormatter.capitalize(interaction.type)),
+                                subtitle: Text(interaction.note),
+                                trailing: Text(
+                                  '${interaction.dateInteraction.day}/${interaction.dateInteraction.month}/${interaction.dateInteraction.year}',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                        title: Text(TextFormatter.capitalize(interaction.type)),
-                        subtitle: Text(interaction.note),
-                        trailing: Text(
-                          '${interaction.dateInteraction.day}/${interaction.dateInteraction.month}/${interaction.dateInteraction.year}',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ),
-                    );
-                  },
                 );
               },
             ),

@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/prospect.dart';
 import '../models/interaction.dart';
 import '../services/database_service.dart';
+import '../services/error_handling_service.dart';
+import '../services/audit_service.dart';
+import '../services/transfer_service.dart';
+import '../services/mysql_service.dart';
 import '../utils/exception_handler.dart';
 import '../utils/app_logger.dart';
 
@@ -19,6 +23,25 @@ class ProspectProvider extends ChangeNotifier {
   Prospect? get selectedProspect => _selectedProspect;
 
   final DatabaseService _databaseService = DatabaseService();
+  AuditService? _auditService;
+  TransferService? _transferService;
+
+  ProspectProvider() {
+    _initializeServices();
+  }
+
+  void _initializeServices() {
+    try {
+      final mysql = MySQLService();
+      if (mysql.isConnected) {
+        final connection = mysql.getConnection();
+        _auditService = AuditService(connection);
+        _transferService = TransferService(connection);
+      }
+    } catch (e) {
+      AppLogger.warning('Services d\'audit/transfert non disponibles: $e');
+    }
+  }
 
   Future<void> loadProspects(int userId) async {
     _isLoading = true;
@@ -26,8 +49,15 @@ class ProspectProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _prospects = await _databaseService.getProspects(userId);
+      _prospects = await ErrorHandlingService.executeWithTimeout(
+        () => _databaseService.getProspects(userId),
+        operationName: 'Chargement des prospects',
+        timeout: ErrorHandlingService.defaultTimeout,
+      );
       AppLogger.success('${_prospects.length} prospect(s) chargé(s)');
+    } on TimeoutException catch (e) {
+      _error = 'Timeout: ${e.message}';
+      AppLogger.error('Timeout lors du chargement', null);
     } on AppException catch (e) {
       _error = e.message;
       AppLogger.warning(
@@ -114,6 +144,15 @@ class ProspectProvider extends ChangeNotifier {
 
     try {
       await _databaseService.deleteProspect(prospectId);
+
+      // Enregistrer l'audit
+      if (_auditService != null) {
+        await _auditService!.logProspectDeletion(
+          prospectId: prospectId,
+          userId: userId,
+        );
+      }
+
       await loadProspects(userId);
       return true;
     } on AppException catch (e) {
@@ -194,5 +233,55 @@ class ProspectProvider extends ChangeNotifier {
   void clearError() {
     _error = null;
     notifyListeners();
+  }
+
+  /// Transfère un prospect d'un utilisateur à un autre
+  Future<bool> transferProspect({
+    required int prospectId,
+    required int fromUserId,
+    required int toUserId,
+    String? reason,
+    String? notes,
+  }) async {
+    try {
+      if (_transferService == null) {
+        _error = 'Service de transfert non disponible';
+        notifyListeners();
+        return false;
+      }
+
+      await _transferService!.createTransfer(
+        prospectId: prospectId,
+        fromUserId: fromUserId,
+        toUserId: toUserId,
+        reason: reason,
+        notes: notes,
+      );
+
+      // Enregistrer l'audit
+      if (_auditService != null) {
+        await _auditService!.logAudit(
+          tableName: 'prospects',
+          recordId: prospectId,
+          action: 'UPDATE',
+          userId: fromUserId,
+          description: 'Prospect transféré à User #$toUserId',
+        );
+      }
+
+      AppLogger.success('Prospect transféré avec succès');
+      notifyListeners();
+      return true;
+    } on AppException catch (e) {
+      _error = e.message;
+      AppLogger.warning('Erreur lors du transfert: ${e.message}');
+      notifyListeners();
+      return false;
+    } catch (e, stackTrace) {
+      _error = 'Erreur: $e';
+      AppLogger.error('Erreur lors du transfert du prospect', e, stackTrace);
+      notifyListeners();
+      return false;
+    }
   }
 }

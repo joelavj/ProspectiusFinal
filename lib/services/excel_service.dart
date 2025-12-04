@@ -84,12 +84,25 @@ class ExcelService {
       final String savePath;
       if (directoryPath != null && directoryPath.isNotEmpty) {
         // Utiliser le répertoire fourni par l'utilisateur
-        final dir = Directory(directoryPath);
+        var dir = Directory(directoryPath);
+
+        // Normaliser le chemin sur Windows (remplacer les / par \)
+        final normalizedPath = directoryPath.replaceAll('/', '\\');
+        dir = Directory(normalizedPath);
+
+        // Créer le répertoire s'il n'existe pas
         if (!await dir.exists()) {
-          throw Exception(
-              'Le répertoire spécifié n\'existe pas: $directoryPath');
+          AppLogger.info('Création du répertoire: $normalizedPath');
+          try {
+            await dir.create(recursive: true);
+          } catch (e) {
+            AppLogger.error('Erreur lors de la création du répertoire', e);
+            throw Exception(
+              'Impossible de créer le répertoire: $normalizedPath\nErreur: $e',
+            );
+          }
         }
-        savePath = '$directoryPath/$fileName.xlsx';
+        savePath = '$normalizedPath\\$fileName.xlsx';
       } else {
         // Utiliser le répertoire de documents par défaut
         final directory = await getApplicationDocumentsDirectory();
@@ -100,10 +113,19 @@ class ExcelService {
       final file = File(savePath);
       final bytes = excel.encode();
       if (bytes != null) {
-        await file.writeAsBytes(bytes);
+        try {
+          await file.writeAsBytes(bytes);
+          AppLogger.success('Fichier Excel créé: $savePath');
+        } catch (e) {
+          // Si l'erreur est due à des permissions, donner un message clair
+          AppLogger.error('Erreur lors de l\'écriture du fichier', e);
+          throw Exception(
+            'Impossible d\'écrire le fichier à cet emplacement: $savePath\n'
+            'Vérifiez que vous avez les permissions d\'écriture.\n'
+            'Erreur: $e',
+          );
+        }
       }
-
-      AppLogger.success('Fichier Excel créé: $savePath');
       return savePath;
     } catch (e, stackTrace) {
       AppLogger.error('Erreur lors de l\'export Excel', e, stackTrace);
@@ -403,22 +425,70 @@ class ExcelService {
           return null;
         }
       } else if (Platform.isWindows) {
-        // Sur Windows
+        // Sur Windows - utiliser PowerShell avec FolderBrowserDialog
         try {
           final result = await Process.run(
             'powershell',
             [
               '-Command',
-              '[System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null; (New-Object System.Windows.Forms.FolderBrowserDialog).ShowDialog()',
+              r'[System.Reflection.Assembly]::LoadWithPartialName("System.windows.forms") | Out-Null; '
+                  r'$folderDialog = New-Object System.Windows.Forms.FolderBrowserDialog; '
+                  r'$folderDialog.Description = "Sélectionner le dossier de destination"; '
+                  r'if ($folderDialog.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { '
+                  r'$folderDialog.SelectedPath '
+                  r'}',
             ],
           );
 
           if (result.exitCode == 0) {
-            return result.stdout.toString().trim();
+            final selectedPath = result.stdout.toString().trim();
+            if (selectedPath.isNotEmpty) {
+              AppLogger.info('Répertoire sélectionné: $selectedPath');
+              return selectedPath;
+            }
           }
         } catch (e) {
-          AppLogger.warning('Dialogue Windows indisponible');
-          return null;
+          AppLogger.warning('Dialogue Windows PowerShell indisponible: $e');
+        }
+
+        // Fallback: essayer avec cmd.exe et vbscript
+        try {
+          final vbScript = '''
+Set shell = CreateObject("Shell.Application")
+Set folder = shell.BrowseForFolder(0, "Sélectionner le dossier de destination:", 0, 0)
+If Not folder Is Nothing Then
+  WScript.Echo folder.Self.Path
+End If
+''';
+
+          // Créer un fichier temporaire VB
+          final tempDir = Directory.systemTemp;
+          final vbFile = File('${tempDir.path}\\select_folder.vbs');
+          await vbFile.writeAsString(vbScript);
+
+          final result = await Process.run('cscript', [vbFile.path]);
+
+          if (result.exitCode == 0) {
+            final selectedPath = result.stdout.toString().trim();
+            if (selectedPath.isNotEmpty && !selectedPath.contains('error')) {
+              AppLogger.info(
+                  'Répertoire sélectionné (VBScript): $selectedPath');
+              try {
+                await vbFile.delete();
+              } catch (_) {
+                // Ignorer l'erreur de suppression du fichier temporaire
+              }
+              return selectedPath;
+            }
+          }
+
+          try {
+            await vbFile.delete();
+          } catch (_) {
+            // Ignorer l'erreur de suppression du fichier temporaire
+          }
+        } catch (e) {
+          AppLogger.warning('Dialogue Windows VBScript indisponible: $e');
         }
       }
 

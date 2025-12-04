@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/auth_provider.dart';
 import '../providers/stats_provider.dart';
+import '../widgets/data_state_widget.dart';
 import '../utils/text_formatter.dart';
 
 class StatsScreen extends StatefulWidget {
@@ -32,260 +33,258 @@ class _StatsScreenState extends State<StatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<StatsProvider>(
-        builder: (context, statsProvider, _) {
-          if (statsProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Bouton d'actualisation en haut
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: _loadStats,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Actualiser'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
+    return Scaffold(body: Consumer<StatsProvider>(
+      builder: (context, statsProvider, _) {
+        return SimpleStateBuilder(
+            isLoading: statsProvider.isLoading,
+            error: statsProvider.error,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    // Bouton d'actualisation en haut
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: _loadStats,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Actualiser'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    // Taux de conversion
+                    if (statsProvider.conversionStats != null)
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              Text(
+                                'Taux de Conversion',
+                                style: Theme.of(context).textTheme.titleLarge,
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        '${statsProvider.conversionStats!.totalProspects}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall
+                                            ?.copyWith(
+                                              color: Colors.blue,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text('Total Prospects'),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        '${statsProvider.conversionStats!.convertedClients}',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall
+                                            ?.copyWith(
+                                              color: Colors.green,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text('Convertis'),
+                                    ],
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        '${(statsProvider.conversionStats!.conversionRate * 100).toStringAsFixed(1)}%',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineSmall
+                                            ?.copyWith(
+                                              color: Colors.orange,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      const Text('Taux'),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  // Taux de conversion
-                  if (statsProvider.conversionStats != null)
-                    Card(
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Taux de Conversion',
-                              style: Theme.of(context).textTheme.titleLarge,
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Column(
-                                  children: [
-                                    Text(
-                                      '${statsProvider.conversionStats!.totalProspects}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            color: Colors.blue,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    const Text('Total Prospects'),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Text(
-                                      '${statsProvider.conversionStats!.convertedClients}',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            color: Colors.green,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    const Text('Convertis'),
-                                  ],
-                                ),
-                                Column(
-                                  children: [
-                                    Text(
-                                      '${(statsProvider.conversionStats!.conversionRate * 100).toStringAsFixed(1)}%',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            color: Colors.orange,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    const Text('Taux'),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                    const SizedBox(height: 32),
+                    // Distribution par statut - Graphique en barres
+                    Text(
+                      'Distribution par Statut',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  const SizedBox(height: 32),
-                  // Distribution par statut - Graphique en barres
-                  Text(
-                    'Distribution par Statut',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  if (statsProvider.prospectStats.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Text('Aucune donnée disponible'),
-                    )
-                  else
-                    Card(
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Graphique en barres avec layout amélioré
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Axe Y personnalisé à gauche
-                                SizedBox(
-                                  width: 50,
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: _buildYAxisLabels(
-                                      statsProvider,
-                                    ),
-                                  ),
-                                ),
-                                // Graphique
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 300,
-                                    child: BarChart(
-                                      BarChartData(
-                                        barGroups:
-                                            _buildBarGroups(statsProvider),
-                                        borderData: FlBorderData(show: false),
-                                        gridData: FlGridData(
-                                          show: true,
-                                          drawHorizontalLine: true,
-                                          drawVerticalLine: false,
-                                        ),
-                                        titlesData: FlTitlesData(
-                                          topTitles: const AxisTitles(
-                                            sideTitles: SideTitles(
-                                              showTitles: false,
-                                            ),
-                                          ),
-                                          rightTitles: const AxisTitles(
-                                            sideTitles: SideTitles(
-                                              showTitles: false,
-                                            ),
-                                          ),
-                                          bottomTitles: AxisTitles(
-                                            sideTitles: SideTitles(
-                                              showTitles: true,
-                                              getTitlesWidget:
-                                                  _getTitlesForBarChart,
-                                              reservedSize: 40,
-                                            ),
-                                          ),
-                                          leftTitles: const AxisTitles(
-                                            sideTitles: SideTitles(
-                                              showTitles: false,
-                                            ),
-                                          ),
-                                        ),
-                                        maxY:
-                                            _getMaxYForBarChart(statsProvider),
+                    const SizedBox(height: 24),
+                    if (statsProvider.prospectStats.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Text('Aucune donnée disponible'),
+                      )
+                    else
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Graphique en barres avec layout amélioré
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Axe Y personnalisé à gauche
+                                  SizedBox(
+                                    width: 50,
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: _buildYAxisLabels(
+                                        statsProvider,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            // Détails cliquables
-                            Text(
-                              'Détails par statut',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 12),
-                            _buildSelectableStatusDetails(
-                              statsProvider,
-                            ),
-                          ],
+                                  // Graphique
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 300,
+                                      child: BarChart(
+                                        BarChartData(
+                                          barGroups:
+                                              _buildBarGroups(statsProvider),
+                                          borderData: FlBorderData(show: false),
+                                          gridData: FlGridData(
+                                            show: true,
+                                            drawHorizontalLine: true,
+                                            drawVerticalLine: false,
+                                          ),
+                                          titlesData: FlTitlesData(
+                                            topTitles: const AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: false,
+                                              ),
+                                            ),
+                                            rightTitles: const AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: false,
+                                              ),
+                                            ),
+                                            bottomTitles: AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: true,
+                                                getTitlesWidget:
+                                                    _getTitlesForBarChart,
+                                                reservedSize: 40,
+                                              ),
+                                            ),
+                                            leftTitles: const AxisTitles(
+                                              sideTitles: SideTitles(
+                                                showTitles: false,
+                                              ),
+                                            ),
+                                          ),
+                                          maxY: _getMaxYForBarChart(
+                                              statsProvider),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              // Détails cliquables
+                              Text(
+                                'Détails par statut',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 12),
+                              _buildSelectableStatusDetails(
+                                statsProvider,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                    const SizedBox(height: 32),
+                    // Performances
+                    Text(
+                      'Performances',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  const SizedBox(height: 32),
-                  // Performances
-                  Text(
-                    'Performances',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  if (statsProvider.prospectStats.isNotEmpty)
-                    Card(
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
-                            _buildPerformanceMetric(
-                              context,
-                              'Taux de Conversion',
-                              _calculateConversionRate(statsProvider),
-                              Colors.green,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildPerformanceMetric(
-                              context,
-                              'Taux de Perte',
-                              _calculateLossRate(statsProvider),
-                              Colors.red,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildPerformanceMetric(
-                              context,
-                              'Taux d\'Engagement',
-                              _calculateEngagementRate(statsProvider),
-                              Colors.blue,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildPerformanceMetric(
-                              context,
-                              'Prospects en Attente',
-                              _calculatePendingCount(statsProvider),
-                              Colors.orange,
-                              isCount: true,
-                            ),
-                          ],
+                    const SizedBox(height: 24),
+                    if (statsProvider.prospectStats.isNotEmpty)
+                      Card(
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            children: [
+                              _buildPerformanceMetric(
+                                context,
+                                'Taux de Conversion',
+                                _calculateConversionRate(statsProvider),
+                                Colors.green,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildPerformanceMetric(
+                                context,
+                                'Taux de Perte',
+                                _calculateLossRate(statsProvider),
+                                Colors.red,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildPerformanceMetric(
+                                context,
+                                'Taux d\'Engagement',
+                                _calculateEngagementRate(statsProvider),
+                                Colors.blue,
+                              ),
+                              const SizedBox(height: 16),
+                              _buildPerformanceMetric(
+                                context,
+                                'Prospects en Attente',
+                                _calculatePendingCount(statsProvider),
+                                Colors.orange,
+                                isCount: true,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
-    );
+            ));
+      },
+    ));
   }
 
   Widget _buildPerformanceMetric(
