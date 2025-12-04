@@ -66,10 +66,10 @@ class _AuditTransferScreenState extends State<AuditTransferScreen> {
         }
 
         if (auditNotifier.auditHistory.isEmpty) {
-          return Center(
+          return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(Icons.history, size: 48, color: Colors.grey),
                 SizedBox(height: 16),
                 Text('Aucun événement d\'audit'),
@@ -148,10 +148,10 @@ class _AuditTransferScreenState extends State<AuditTransferScreen> {
         }
 
         if (transferNotifier.transferHistory.isEmpty) {
-          return Center(
+          return const Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
+              children: [
                 Icon(Icons.compare_arrows, size: 48, color: Colors.grey),
                 SizedBox(height: 16),
                 Text('Aucun transfert'),

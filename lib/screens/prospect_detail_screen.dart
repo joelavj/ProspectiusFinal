@@ -103,9 +103,24 @@ class _ProspectDetailScreenState extends State<ProspectDetailScreen> {
             onSelected: (value) {
               if (value == 'delete') {
                 _handleDelete();
+              } else if (value == 'audit') {
+                Navigator.of(context).pushNamed(
+                  '/audit_transfer',
+                  arguments: _currentProspect.id,
+                );
               }
             },
             itemBuilder: (BuildContext context) => [
+              const PopupMenuItem(
+                value: 'audit',
+                child: Row(
+                  children: [
+                    Icon(Icons.history, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('Audit et transferts'),
+                  ],
+                ),
+              ),
               const PopupMenuItem(
                 value: 'delete',
                 child: Row(

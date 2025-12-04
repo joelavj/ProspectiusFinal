@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/auth_provider.dart';
 import 'providers/prospect_provider.dart';
 import 'providers/stats_provider.dart';
+import 'providers/audit_provider.dart';
 import 'screens/database_config_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/prospects_screen.dart';
@@ -14,6 +15,7 @@ import 'screens/profile_screen.dart';
 import 'screens/clients_screen.dart';
 import 'screens/configuration_screen.dart';
 import 'screens/exploration_screen.dart';
+import 'screens/audit_transfer_screen.dart';
 import 'widgets/sidebar_navigation.dart';
 import 'services/mysql_service.dart';
 import 'services/logging_service.dart';
@@ -36,6 +38,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ProspectProvider()),
         ChangeNotifierProvider(create: (_) => StatsProvider()),
+        ChangeNotifierProvider(create: (_) => AuditNotifier()),
+        ChangeNotifierProvider(create: (_) => TransferNotifier()),
       ],
       child: MaterialApp(
         title: 'Prospectius',
@@ -46,6 +50,11 @@ class MyApp extends StatelessWidget {
           '/config': (_) => const DatabaseConfigScreen(),
           '/login': (_) => const LoginScreen(),
           '/prospects': (_) => const MainScreen(),
+          '/audit_transfer': (context) {
+            final prospectId =
+                ModalRoute.of(context)?.settings.arguments as int?;
+            return AuditTransferScreen(prospectId: prospectId ?? 0);
+          },
         },
       ),
     );
