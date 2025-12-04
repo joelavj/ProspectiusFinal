@@ -61,28 +61,18 @@ class ProspectProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await ErrorHandlingService.executeWithTimeout(
-        () => _databaseService.createProspect(
-          userId,
-          nom,
-          prenom,
-          email,
-          telephone,
-          adresse,
-          type,
-        ),
-        operationName: 'Création du prospect',
-        timeout: ErrorHandlingService.defaultTimeout,
+      await _databaseService.createProspect(
+        userId,
+        nom,
+        prenom,
+        email,
+        telephone,
+        adresse,
+        type,
       );
 
       await loadProspects(userId);
       return true;
-    } on TimeoutException catch (e) {
-      _error = 'Timeout: ${e.message}';
-      AppLogger.error('Timeout lors de la création', null);
-      _isLoading = false;
-      notifyListeners();
-      return false;
     } on AppException catch (e) {
       _error = e.message;
       AppLogger.warning('Erreur lors de la création: ${e.message}');
@@ -107,19 +97,9 @@ class ProspectProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await ErrorHandlingService.executeWithTimeout(
-        () => _databaseService.updateProspect(prospectId, data),
-        operationName: 'Mise à jour du prospect',
-        timeout: ErrorHandlingService.defaultTimeout,
-      );
+      await _databaseService.updateProspect(prospectId, data);
       await loadProspects(userId);
       return true;
-    } on TimeoutException catch (e) {
-      _error = 'Timeout: ${e.message}';
-      AppLogger.error('Timeout lors de la mise à jour', null);
-      _isLoading = false;
-      notifyListeners();
-      return false;
     } on AppException catch (e) {
       _error = e.message;
       AppLogger.warning('Erreur lors de la mise à jour: ${e.message}');
@@ -127,29 +107,19 @@ class ProspectProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e, stackTrace) {
+      _error = 'Erreur: $e';
+      AppLogger.error(
+          'Erreur lors de la mise à jour du prospect', e, stackTrace);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteProspect(int userId, int prospectId) async {
     _isLoading = true;
     notifyListeners();
 
-    try {
-      await ErrorHandlingService.executeWithTimeout(
-        () => _databaseService.deleteProspect(prospectId),
-        operationName: 'Suppression du prospect',
-        timeout: ErrorHandlingService.defaultTimeout,
-      );
-      await loadProspects(userId);
-      return true;
-    } on TimeoutException catch (e) {
-      _error = 'Timeout: ${e.message}';
-      AppLogger.error('Timeout lors de la suppression', null);
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    } on AppException catch (e) {
-      _error = e.message;
-      AppLogger.warning('Erreur lors de la suppression: ${e.message}');
-      _isLoading = false;
-      notifyListeners();
-      return false;
     try {
       await _databaseService.deleteProspect(prospectId);
       await loadProspects(userId);
@@ -161,23 +131,16 @@ class ProspectProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e, stackTrace) {
-    _isLoading = true;
-    notifyListeners();
+      _error = 'Erreur: $e';
+      AppLogger.error(
+          'Erreur lors de la suppression du prospect', e, stackTrace);
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
 
-    try {
-      _interactions = await ErrorHandlingService.executeWithTimeout(
-        () => _databaseService.getInteractions(prospectId),
-        operationName: 'Chargement des interactions',
-        timeout: ErrorHandlingService.defaultTimeout,
-      );
-      AppLogger.success('${_interactions.length} interaction(s) chargée(s)');
-    } on TimeoutException catch (e) {
-      _error = 'Timeout: ${e.message}';
-      AppLogger.error('Timeout lors du chargement des interactions', null);
-    } on AppException catch (e) {
-      _error = e.message;
-      AppLogger.warning(
-          'Erreur lors du chargement des interactions: ${e.message}');
+  Future<void> loadInteractions(int prospectId) async {
     _isLoading = true;
     notifyListeners();
 
