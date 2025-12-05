@@ -58,8 +58,8 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
           prospect.adresse.toLowerCase().contains(searchQuery);
 
       // Filtre par catégorie
-      final matchesCategory =
-          _selectedCategory == 'Tous' || prospect.type == _selectedCategory;
+      final matchesCategory = _selectedCategory == 'Tous' ||
+          prospect.type.toLowerCase() == _selectedCategory.toLowerCase();
 
       // Filtre par dates
       final matchesDate = (_startDate == null ||
