@@ -101,7 +101,7 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ],
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.business_center,
                       size: 100,
                       color: Colors.white,
