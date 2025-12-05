@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert' as convert;
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -77,8 +78,9 @@ class LoggingService {
         _createDailyLogFile();
       }
 
-      // Écrire dans le fichier
-      await _currentLogFile.writeAsString(logEntry, mode: FileMode.append);
+      // Écrire dans le fichier avec encoding UTF-8 explicite
+      await _currentLogFile.writeAsString(logEntry,
+          mode: FileMode.append, encoding: convert.utf8);
     } catch (e) {
       // Erreur lors de l'écriture du log, continuer sans interruption
     }
@@ -222,20 +224,25 @@ class LoggingService {
     summary.writeln('=' * 50);
 
     for (final logFile in files) {
-      final content = await logFile.readAsString();
-      final exportLines = content.split('\n').where((line) {
-        return line.contains('EXPORT_') ||
-            line.contains('DIR_SELECT_') ||
-            line.contains('DIR_CREATE_') ||
-            line.contains('FILE_SAVE_');
-      }).toList();
+      try {
+        final content = await readLogFileWithFallback(logFile);
+        final exportLines = content.split('\n').where((line) {
+          return line.contains('EXPORT_') ||
+              line.contains('DIR_SELECT_') ||
+              line.contains('DIR_CREATE_') ||
+              line.contains('FILE_SAVE_');
+        }).toList();
 
-      if (exportLines.isNotEmpty) {
-        summary.writeln('\n📅 ${logFile.path.split('/').last}');
-        summary.writeln('-' * 50);
-        for (final line in exportLines) {
-          summary.writeln(line);
+        if (exportLines.isNotEmpty) {
+          summary.writeln('\n📅 ${logFile.path.split('/').last}');
+          summary.writeln('-' * 50);
+          for (final line in exportLines) {
+            summary.writeln(line);
+          }
         }
+      } catch (e) {
+        summary.writeln(
+            '\n⚠️ Erreur lors de la lecture du fichier ${logFile.path.split('/').last}: $e');
       }
     }
 
@@ -248,15 +255,20 @@ class LoggingService {
     final errors = <String>[];
 
     for (final logFile in files) {
-      final content = await logFile.readAsString();
-      final errorLines = content.split('\n').where((line) {
-        return line.contains('EXPORT_ERROR') ||
-            line.contains('DIR_CREATE_FAILED') ||
-            line.contains('FILE_SAVE_FAILED') ||
-            line.contains('❌');
-      }).toList();
+      try {
+        final content = await readLogFileWithFallback(logFile);
+        final errorLines = content.split('\n').where((line) {
+          return line.contains('EXPORT_ERROR') ||
+              line.contains('DIR_CREATE_FAILED') ||
+              line.contains('FILE_SAVE_FAILED') ||
+              line.contains('❌');
+        }).toList();
 
-      errors.addAll(errorLines);
+        errors.addAll(errorLines);
+      } catch (e) {
+        errors.add(
+            '⚠️ Erreur lors de la lecture du fichier ${logFile.path.split('/').last}: $e');
+      }
     }
 
     return errors;
@@ -318,17 +330,53 @@ class LoggingService {
 
       for (final file in files.toList().reversed) {
         buffer.writeln('--- ${file.path.split('/').last} ---');
-        buffer.write(await file.readAsString());
+        try {
+          // Utiliser la méthode robuste pour lire
+          final content = await readLogFileWithFallback(file);
+          buffer.write(content);
+        } catch (e) {
+          buffer.writeln('[ERREUR] Impossible de lire ce fichier: $e');
+        }
         buffer.writeln('\n');
       }
 
       final exportFile = File(
           '${_logsDirectory.path}/export_${DateTime.now().millisecondsSinceEpoch}.txt');
-      await exportFile.writeAsString(buffer.toString());
+      await exportFile.writeAsString(buffer.toString(), encoding: convert.utf8);
       return exportFile.path;
     } catch (e) {
       await logError('Erreur lors de l\'export des logs: $e');
       return null;
+    }
+  }
+
+  /// Lit le contenu d'un fichier log avec gestion robuste d'encoding
+  Future<String> readLogFileWithFallback(File file) async {
+    try {
+      // Essayer d'abord en UTF-8
+      return await file.readAsString(encoding: convert.utf8);
+    } catch (e) {
+      try {
+        // Si UTF-8 échoue, essayer de lire en bytes et remplacer les caractères invalides
+        final bytes = await file.readAsBytes();
+        // Décoder avec remplacement des caractères invalides
+        String result = '';
+        for (int byte in bytes) {
+          if (byte < 128) {
+            result += String.fromCharCode(byte);
+          } else if (byte < 192) {
+            result += '?'; // Caractère de remplacement
+          } else {
+            result += '?'; // Caractère de remplacement
+          }
+        }
+        return result;
+      } catch (e2) {
+        // Si tout échoue, retourner un message d'erreur
+        return '[ERREUR LECTURE] Le fichier log ne peut pas être lu correctement.\n'
+            'Le fichier peut être corrompu ou contenir des caractères invalides.\n'
+            'Erreur: $e2';
+      }
     }
   }
 }
