@@ -86,6 +86,9 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
       case 'status':
         _filteredProspects.sort((a, b) => a.status.compareTo(b.status));
         break;
+      case 'type':
+        _filteredProspects.sort((a, b) => a.type.compareTo(b.type));
+        break;
     }
 
     setState(() {});
@@ -390,6 +393,10 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
         DropdownMenuItem(
           value: 'status',
           child: Text('Par statut'),
+        ),
+        DropdownMenuItem(
+          value: 'type',
+          child: Text('Par type'),
         ),
       ],
     );
