@@ -14,7 +14,7 @@ class DataStateWidget<T> extends StatelessWidget {
   final String emptyMessage;
 
   const DataStateWidget({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.error,
     required this.data,
@@ -24,7 +24,7 @@ class DataStateWidget<T> extends StatelessWidget {
     this.loadingBuilder,
     this.onRetry,
     this.emptyMessage = 'Aucune donnée',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -106,12 +106,12 @@ class SimpleStateBuilder extends StatelessWidget {
   final Duration timeout;
 
   const SimpleStateBuilder({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.error,
     required this.child,
     this.timeout = const Duration(seconds: 30),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

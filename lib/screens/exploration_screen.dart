@@ -7,7 +7,7 @@ import '../providers/auth_provider.dart';
 import 'prospect_detail_screen.dart';
 
 class ExplorationScreen extends StatefulWidget {
-  const ExplorationScreen({Key? key}) : super(key: key);
+  const ExplorationScreen({super.key});
 
   @override
   State<ExplorationScreen> createState() => _ExplorationScreenState();

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
 class ConfigurationScreen extends StatefulWidget {
-  const ConfigurationScreen({Key? key}) : super(key: key);
+  const ConfigurationScreen({super.key});
 
   @override
   State<ConfigurationScreen> createState() => _ConfigurationScreenState();

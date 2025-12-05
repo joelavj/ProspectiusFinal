@@ -26,8 +26,8 @@ class _StatsScreenState extends State<StatsScreen> {
     final authProvider = context.read<AuthProvider>();
     final statsProvider = context.read<StatsProvider>();
     if (authProvider.currentUser != null) {
-      statsProvider.loadProspectStats(authProvider.currentUser!.id);
-      statsProvider.loadConversionStats(authProvider.currentUser!.id);
+      // Charger les deux statistiques en parallèle
+      statsProvider.loadAllStats(authProvider.currentUser!.id);
     }
   }
 
@@ -456,7 +456,7 @@ class _StatsScreenState extends State<StatsScreen> {
     if (index >= 0 && index < provider.prospectStats.length) {
       final stat = provider.prospectStats[index];
       return SideTitleWidget(
-        axisSide: meta.axisSide,
+        meta: meta,
         child: Text(
           TextFormatter.formatStatus(stat.status),
           style: style,

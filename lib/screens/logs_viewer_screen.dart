@@ -4,7 +4,7 @@ import '../utils/app_logger.dart';
 
 class LogsViewerScreen extends StatefulWidget {
   final String title;
-  const LogsViewerScreen({Key? key, this.title = 'Logs'}) : super(key: key);
+  const LogsViewerScreen({super.key, this.title = 'Logs'});
 
   @override
   State<LogsViewerScreen> createState() => _LogsViewerScreenState();
@@ -71,17 +71,23 @@ class _LogsViewerScreenState extends State<LogsViewerScreen> {
         buffer.writeln('📅 $fileName');
         buffer.writeln('-' * 60);
 
-        final content = await logFile.readAsString();
-        final lines = content.split('\n');
+        try {
+          // Utiliser la méthode robuste pour lire le fichier log
+          final content =
+              await _loggingService.readLogFileWithFallback(logFile);
+          final lines = content.split('\n');
 
-        // Afficher les 50 dernières lignes
-        final recentLines =
-            lines.length > 50 ? lines.sublist(lines.length - 50) : lines;
+          // Afficher les 50 dernières lignes
+          final recentLines =
+              lines.length > 50 ? lines.sublist(lines.length - 50) : lines;
 
-        for (final line in recentLines) {
-          if (line.isNotEmpty) {
-            buffer.writeln(line);
+          for (final line in recentLines) {
+            if (line.isNotEmpty) {
+              buffer.writeln(line);
+            }
           }
+        } catch (e) {
+          buffer.writeln('[ERREUR] Impossible de lire ce fichier: $e');
         }
         buffer.writeln('');
       }

@@ -7,7 +7,7 @@ import '../services/logging_service.dart';
 import '../utils/text_formatter.dart';
 
 class ExportProspectsScreen extends StatefulWidget {
-  const ExportProspectsScreen({Key? key}) : super(key: key);
+  const ExportProspectsScreen({super.key});
 
   @override
   State<ExportProspectsScreen> createState() => _ExportProspectsScreenState();

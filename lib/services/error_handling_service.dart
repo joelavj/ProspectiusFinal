@@ -4,8 +4,8 @@ import '../utils/app_logger.dart';
 /// Service pour gérer les erreurs et timeouts de manière robuste
 /// Prévient les écrans bloqués sur le loading
 class ErrorHandlingService {
-  static const Duration defaultTimeout = Duration(seconds: 30);
-  static const Duration shortTimeout = Duration(seconds: 10);
+  static const Duration defaultTimeout = Duration(seconds: 15);
+  static const Duration shortTimeout = Duration(seconds: 5);
 
   /// Exécute une fonction asynchrone avec timeout et gestion d'erreur
   /// Si le timeout est dépassé, on retourne une erreur au lieu de bloquer

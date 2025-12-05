@@ -6,9 +6,9 @@ class TransferStatsWidget extends StatefulWidget {
   final int userId;
 
   const TransferStatsWidget({
-    Key? key,
+    super.key,
     required this.userId,
-  }) : super(key: key);
+  });
 
   @override
   State<TransferStatsWidget> createState() => _TransferStatsWidgetState();
@@ -88,12 +88,11 @@ class _StatCard extends StatelessWidget {
   final Color color;
 
   const _StatCard({
-    Key? key,
     required this.icon,
     required this.label,
     required this.value,
     required this.color,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
