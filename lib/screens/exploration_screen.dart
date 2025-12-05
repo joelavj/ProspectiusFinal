@@ -64,9 +64,9 @@ class _ExplorationScreenState extends State<ExplorationScreen> {
       // Filtre par dates
       final matchesDate = (_startDate == null ||
               prospect.creation
-                  .isAfter(_startDate!.subtract(Duration(days: 1)))) &&
+                  .isAfter(_startDate!.subtract(const Duration(days: 1)))) &&
           (_endDate == null ||
-              prospect.creation.isBefore(_endDate!.add(Duration(days: 1))));
+              prospect.creation.isBefore(_endDate!.add(const Duration(days: 1))));
 
       return matchesSearch && matchesCategory && matchesDate;
     }).toList();
