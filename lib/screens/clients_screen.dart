@@ -7,7 +7,7 @@ import '../utils/text_formatter.dart';
 import 'prospect_detail_screen.dart';
 
 class ClientsScreen extends StatefulWidget {
-  const ClientsScreen({Key? key}) : super(key: key);
+  const ClientsScreen({super.key});
 
   @override
   State<ClientsScreen> createState() => _ClientsScreenState();

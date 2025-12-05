@@ -8,8 +8,7 @@ import '../utils/text_formatter.dart';
 class EditProspectScreen extends StatefulWidget {
   final Prospect prospect;
 
-  const EditProspectScreen({Key? key, required this.prospect})
-      : super(key: key);
+  const EditProspectScreen({super.key, required this.prospect});
 
   @override
   State<EditProspectScreen> createState() => _EditProspectScreenState();

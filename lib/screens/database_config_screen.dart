@@ -5,7 +5,7 @@ import '../providers/auth_provider.dart';
 import '../services/mysql_service.dart';
 
 class DatabaseConfigScreen extends StatefulWidget {
-  const DatabaseConfigScreen({Key? key}) : super(key: key);
+  const DatabaseConfigScreen({super.key});
 
   @override
   State<DatabaseConfigScreen> createState() => _DatabaseConfigScreenState();

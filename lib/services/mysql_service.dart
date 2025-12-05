@@ -4,6 +4,7 @@ import 'dart:convert';
 import '../utils/exception_handler.dart';
 import '../utils/app_logger.dart';
 import 'migration_service.dart';
+import 'schema_initialization_service.dart';
 
 class MySQLConfig {
   final String host;
@@ -134,6 +135,10 @@ class MySQLService {
         config.toConnectionSettings(),
       );
       _isConnected = true;
+
+      // Initialiser le service d'initialisation du schéma
+      final schemaService = SchemaInitializationService(_connection);
+      await schemaService.initializeSchema();
 
       // Initialiser le service de migrations
       _migrationService = MigrationService(_connection);

@@ -6,9 +6,9 @@ class AuditTransferScreen extends StatefulWidget {
   final int prospectId;
 
   const AuditTransferScreen({
-    Key? key,
+    super.key,
     required this.prospectId,
-  }) : super(key: key);
+  });
 
   @override
   State<AuditTransferScreen> createState() => _AuditTransferScreenState();

@@ -4,7 +4,7 @@ import '../utils/app_logger.dart';
 
 class LogsViewerScreen extends StatefulWidget {
   final String title;
-  const LogsViewerScreen({Key? key, this.title = 'Logs'}) : super(key: key);
+  const LogsViewerScreen({super.key, this.title = 'Logs'});
 
   @override
   State<LogsViewerScreen> createState() => _LogsViewerScreenState();

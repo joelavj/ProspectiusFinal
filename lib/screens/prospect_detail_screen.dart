@@ -10,8 +10,7 @@ import 'edit_prospect_screen.dart';
 class ProspectDetailScreen extends StatefulWidget {
   final Prospect prospect;
 
-  const ProspectDetailScreen({Key? key, required this.prospect})
-      : super(key: key);
+  const ProspectDetailScreen({super.key, required this.prospect});
 
   @override
   State<ProspectDetailScreen> createState() => _ProspectDetailScreenState();

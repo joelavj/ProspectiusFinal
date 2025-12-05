@@ -35,11 +35,9 @@ class ExcelService {
       // Ajouter les en-têtes avec style
       for (int i = 0; i < headers.length; i++) {
         dataSheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0))
-          ..value = headers[i]
+          ..value = TextCellValue(headers[i])
           ..cellStyle = CellStyle(
             bold: true,
-            backgroundColorHex: '4472C4',
-            fontColorHex: 'FFFFFF',
           );
       }
 
@@ -63,13 +61,11 @@ class ExcelService {
             columnIndex: col,
             rowIndex: row + 1,
           ));
-          cell.value = cells[col];
+          cell.value = TextCellValue(cells[col]);
 
           // Ajouter la couleur de background selon le statut (colonne 6 = statut)
           if (col == 6) {
             cell.cellStyle = CellStyle(
-              backgroundColorHex: _getStatusColor(prospect.status),
-              fontColorHex: 'FFFFFF',
               bold: true,
             );
           }
@@ -142,22 +138,22 @@ class ExcelService {
 
     // Titre
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'STATISTIQUES'
+      ..value = TextCellValue('STATISTIQUES')
       ..cellStyle = CellStyle(bold: true);
     row += 2;
 
     // Total prospects
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Total prospects'
+      ..value = TextCellValue('Total prospects')
       ..cellStyle = CellStyle(bold: true);
     sheet
         .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-        .value = prospects.length;
+        .value = IntCellValue(prospects.length);
     row += 2;
 
     // Statistiques par statut
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Par statut'
+      ..value = TextCellValue('Par statut')
       ..cellStyle = CellStyle(bold: true);
     row += 1;
 
@@ -176,10 +172,10 @@ class ExcelService {
       if (statusMap.containsKey(status)) {
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-            .value = _formatStatus(status);
+            .value = TextCellValue(_formatStatus(status));
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-            .value = statusMap[status];
+            .value = IntCellValue(statusMap[status] ?? 0);
         row += 1;
       }
     }
@@ -188,7 +184,7 @@ class ExcelService {
 
     // Statistiques par mois
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Par mois'
+      ..value = TextCellValue('Par mois')
       ..cellStyle = CellStyle(bold: true);
     row += 1;
 
@@ -203,10 +199,10 @@ class ExcelService {
     for (final month in sortedMonths) {
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-          .value = month;
+          .value = TextCellValue(month);
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-          .value = monthMap[month];
+          .value = IntCellValue(monthMap[month] ?? 0);
       row += 1;
     }
 
@@ -214,7 +210,7 @@ class ExcelService {
 
     // Statistiques par type
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Par type'
+      ..value = TextCellValue('Par type')
       ..cellStyle = CellStyle(bold: true);
     row += 1;
 
@@ -226,10 +222,10 @@ class ExcelService {
     for (final entry in typeMap.entries) {
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-          .value = _formatType(entry.key);
+          .value = TextCellValue(_formatType(entry.key));
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-          .value = entry.value;
+          .value = IntCellValue(entry.value);
       row += 1;
     }
 
@@ -237,7 +233,7 @@ class ExcelService {
 
     // Performances
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'PERFORMANCES'
+      ..value = TextCellValue('PERFORMANCES')
       ..cellStyle = CellStyle(bold: true);
     row += 2;
 
@@ -247,11 +243,11 @@ class ExcelService {
         prospects.isEmpty ? 0.0 : (convertis / prospects.length) * 100;
 
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Taux de conversion'
+      ..value = TextCellValue('Taux de conversion')
       ..cellStyle = CellStyle(bold: true);
     sheet
         .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-        .value = '${tauxConversion.toStringAsFixed(2)}%';
+        .value = TextCellValue('${tauxConversion.toStringAsFixed(2)}%');
     row += 1;
 
     // Taux de perte
@@ -260,11 +256,11 @@ class ExcelService {
         prospects.isEmpty ? 0.0 : (perdus / prospects.length) * 100;
 
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Taux de perte'
+      ..value = TextCellValue('Taux de perte')
       ..cellStyle = CellStyle(bold: true);
     sheet
         .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-        .value = '${tauxPerte.toStringAsFixed(2)}%';
+        .value = TextCellValue('${tauxPerte.toStringAsFixed(2)}%');
     row += 1;
 
     // Taux d'engagement (interessé + en négociation)
@@ -274,22 +270,22 @@ class ExcelService {
         prospects.isEmpty ? 0.0 : (engages / prospects.length) * 100;
 
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Taux d\'engagement'
+      ..value = TextCellValue('Taux d\'engagement')
       ..cellStyle = CellStyle(bold: true);
     sheet
         .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-        .value = '${tauxEngagement.toStringAsFixed(2)}%';
+        .value = TextCellValue('${tauxEngagement.toStringAsFixed(2)}%');
     row += 1;
 
     // Prospects en attente (non convertis et non perdus)
     final enAttente = prospects.length - convertis - perdus;
 
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Prospects en attente'
+      ..value = TextCellValue('Prospects en attente')
       ..cellStyle = CellStyle(bold: true);
     sheet
         .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-        .value = enAttente;
+        .value = IntCellValue(enAttente);
     row += 2;
 
     // Moyenne de prospects par mois
@@ -297,11 +293,11 @@ class ExcelService {
         monthMap.isEmpty ? 0.0 : prospects.length / monthMap.length;
 
     sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-      ..value = 'Moyenne de prospects/mois'
+      ..value = TextCellValue('Moyenne de prospects/mois')
       ..cellStyle = CellStyle(bold: true);
     sheet
         .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-        .value = moyenneParMois.toStringAsFixed(2);
+        .value = TextCellValue(moyenneParMois.toStringAsFixed(2));
     row += 1;
 
     // Prospect le plus récent
@@ -309,11 +305,11 @@ class ExcelService {
       final plusRecent =
           prospects.reduce((a, b) => a.creation.isAfter(b.creation) ? a : b);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-        ..value = 'Prospect le plus récent'
+        ..value = TextCellValue('Prospect le plus récent')
         ..cellStyle = CellStyle(bold: true);
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-          .value = _formatMonth(plusRecent.creation);
+          .value = TextCellValue(_formatMonth(plusRecent.creation));
       row += 1;
     }
 
@@ -322,11 +318,11 @@ class ExcelService {
       final plusAncien =
           prospects.reduce((a, b) => a.creation.isBefore(b.creation) ? a : b);
       sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: row))
-        ..value = 'Prospect le plus ancien'
+        ..value = TextCellValue('Prospect le plus ancien')
         ..cellStyle = CellStyle(bold: true);
       sheet
           .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row))
-          .value = _formatMonth(plusAncien.creation);
+          .value = TextCellValue(_formatMonth(plusAncien.creation));
       row += 1;
     }
   }
@@ -358,24 +354,6 @@ class ExcelService {
       'Décembre'
     ];
     return '${months[date.month - 1]} ${date.year}';
-  }
-
-  /// Retourne la couleur hexadécimale selon le statut
-  String _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'nouveau':
-        return '4472C4'; // Bleu
-      case 'interesse':
-        return 'FFC000'; // Orange
-      case 'negociation':
-        return 'FF8C00'; // Orange foncé
-      case 'converti':
-        return '70AD47'; // Vert
-      case 'perdu':
-        return 'C5504B'; // Rouge
-      default:
-        return '808080'; // Gris
-    }
   }
 
   /// Ouvre un dialogue pour choisir le répertoire de sauvegarde
