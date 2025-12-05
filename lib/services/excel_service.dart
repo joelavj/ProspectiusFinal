@@ -91,11 +91,12 @@ class ExcelService {
         dir = Directory(normalizedPath);
 
         // Créer le répertoire s'il n'existe pas
+        // ignore: avoid_slow_async_io
         if (!await dir.exists()) {
           AppLogger.info('Création du répertoire: $normalizedPath');
           try {
             await dir.create(recursive: true);
-          } catch (e) {
+          } on FileSystemException catch (e) {
             AppLogger.error('Erreur lors de la création du répertoire', e);
             throw Exception(
               'Impossible de créer le répertoire: $normalizedPath\nErreur: $e',
