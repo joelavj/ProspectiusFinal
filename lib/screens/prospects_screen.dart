@@ -33,6 +33,24 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mes Prospects'),
+        elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Consumer<ProspectProvider>(
+              builder: (context, prospectProvider, _) {
+                return IconButton(
+                  onPressed: prospectProvider.isLoading ? null : _loadProspects,
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Actualiser',
+                );
+              },
+            ),
+          ),
+        ],
+      ),
       body: Consumer<ProspectProvider>(
         builder: (context, prospectProvider, _) {
           return SimpleStateBuilder(
