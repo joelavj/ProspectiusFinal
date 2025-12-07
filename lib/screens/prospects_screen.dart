@@ -19,7 +19,10 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProspects();
+    // Utiliser addPostFrameCallback pour éviter setState() pendant le build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProspects();
+    });
   }
 
   void _loadProspects() {

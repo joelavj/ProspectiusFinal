@@ -17,7 +17,10 @@ class _ClientsScreenState extends State<ClientsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadClients();
+    // Utiliser addPostFrameCallback pour éviter setState() pendant le build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadClients();
+    });
   }
 
   void _loadClients() {
