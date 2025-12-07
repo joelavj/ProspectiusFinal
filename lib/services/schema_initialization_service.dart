@@ -16,8 +16,9 @@ class SchemaInitializationService {
       await _createAccountsTable();
       await _createProspectsTable();
       await _createInteractionsTable();
-      await _createAuditLogsTable();
+      await _createStatusHistoryTable();
       await _createTransferHistoryTable();
+      await _createAuditLogsTable();
 
       AppLogger.success('✓ Schéma de base de données initialisé avec succès');
     } catch (e, stackTrace) {
@@ -109,6 +110,36 @@ class SchemaInitializationService {
   Future<void> _createAuditLogsTable() async {
     try {
       await _connection.query('''
+        CREATE TABLE IF NOT EXISTS audit_logs (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          table_name VARCHAR(100) NOT NULL,
+          record_id INT NOT NULL,
+          action VARCHAR(50) NOT NULL,
+          user_id INT,
+          old_values JSON,
+          new_values JSON,
+          change_description TEXT,
+          ip_address VARCHAR(45),
+          user_agent VARCHAR(255),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES Account(id_compte) ON DELETE SET NULL,
+          INDEX idx_table_record (table_name, record_id),
+          INDEX idx_user (user_id),
+          INDEX idx_timestamp (created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+      ''');
+      AppLogger.success('Table audit_logs créée/vérifiée');
+    } catch (e, stackTrace) {
+      AppLogger.error(
+          'Erreur lors de la création de la table audit_logs', e, stackTrace);
+      rethrow;
+    }
+  }
+
+  /// Crée la table StatusHistory
+  Future<void> _createStatusHistoryTable() async {
+    try {
+      await _connection.query('''
         CREATE TABLE IF NOT EXISTS StatusHistory (
           id_status_history INT AUTO_INCREMENT PRIMARY KEY,
           id_prospect INT NOT NULL,
@@ -130,29 +161,32 @@ class SchemaInitializationService {
     }
   }
 
-  /// Crée la table transfer_history
+  /// Crée la table TransferHistory
   Future<void> _createTransferHistoryTable() async {
     try {
       await _connection.query('''
-        CREATE TABLE IF NOT EXISTS AuditLog (
+        CREATE TABLE IF NOT EXISTS TransferHistory (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          id_compte INT,
-          table_name VARCHAR(100),
-          action VARCHAR(50),
-          record_id INT,
-          old_value JSON,
-          new_value JSON,
-          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          ip_address VARCHAR(45),
-          FOREIGN KEY (id_compte) REFERENCES Account(id_compte) ON DELETE SET NULL,
-          INDEX idx_compte (id_compte),
-          INDEX idx_timestamp (timestamp)
+          id_prospect INT NOT NULL,
+          from_user_id INT NOT NULL,
+          to_user_id INT NOT NULL,
+          transfer_reason VARCHAR(255),
+          transfer_notes TEXT,
+          transfer_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          status ENUM('completed', 'pending', 'cancelled') DEFAULT 'completed',
+          FOREIGN KEY (id_prospect) REFERENCES Prospect(id_prospect) ON DELETE CASCADE,
+          FOREIGN KEY (from_user_id) REFERENCES Account(id_compte) ON DELETE RESTRICT,
+          FOREIGN KEY (to_user_id) REFERENCES Account(id_compte) ON DELETE RESTRICT,
+          INDEX idx_prospect (id_prospect),
+          INDEX idx_from_user (from_user_id),
+          INDEX idx_to_user (to_user_id),
+          INDEX idx_transfer_date (transfer_date)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
       ''');
-      AppLogger.success('Table AuditLog créée/vérifiée');
+      AppLogger.success('Table TransferHistory créée/vérifiée');
     } catch (e, stackTrace) {
-      AppLogger.error(
-          'Erreur lors de la création de la table AuditLog', e, stackTrace);
+      AppLogger.error('Erreur lors de la création de la table TransferHistory',
+          e, stackTrace);
       rethrow;
     }
   }

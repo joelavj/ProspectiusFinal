@@ -1,6 +1,7 @@
 import 'transaction_service.dart';
 import '../utils/exception_handler.dart';
 import '../utils/app_logger.dart';
+import 'dart:convert';
 
 /// Service d'exemple pour démontrer l'utilisation des transactions
 /// et du verrouillage optimiste/pessimiste
@@ -61,7 +62,7 @@ class TransactionalProspectService {
           // Étape 3: Enregistrer l'historique des changements
           await connection.query(
             '''INSERT INTO StatusHistory 
-               (prospect_id, old_status, new_status, user_id, changed_at) 
+               (id_prospect, old_status, new_status, changed_by, changed_at) 
                VALUES (?, ?, ?, ?, NOW())''',
             [prospectId, oldStatus, newStatus, userId],
           );
@@ -99,28 +100,27 @@ class TransactionalProspectService {
           // Étape 1: Insérer l'interaction
           await connection.query(
             '''INSERT INTO Interaction 
-               (prospect_id, user_id, description, type, created_at) 
+               (id_prospect, id_compte, note, type, date_interaction) 
                VALUES (?, ?, ?, ?, NOW())''',
             [prospectId, userId, description, type],
           );
 
           AppLogger.debug('Interaction créée');
 
-          // Étape 2: Incrémenter le compteur (atomique avec la transaction)
+          // Étape 2: Mettre à jour la date de modification (atomique avec la transaction)
           final updateResult = await connection.query(
-            'UPDATE Prospect SET interaction_count = interaction_count + 1, date_update = NOW() WHERE id_prospect = ?',
+            'UPDATE Prospect SET date_update = NOW() WHERE id_prospect = ?',
             [prospectId],
           );
 
           if (updateResult.affectedRows == 0) {
             throw DatabaseException(
-              message:
-                  'Impossible de mettre à jour le compteur du prospect #$prospectId',
+              message: 'Impossible de mettre à jour le prospect #$prospectId',
               code: 'UPDATE_FAILED',
             );
           }
 
-          AppLogger.debug('Compteur d\'interaction incrémenté');
+          AppLogger.debug('Prospect mis à jour');
         },
       );
 
@@ -185,7 +185,7 @@ class TransactionalProspectService {
           // Étape 3: Enregistrer le transfert dans l'historique
           await connection.query(
             '''INSERT INTO TransferHistory 
-               (prospect_id, from_user_id, to_user_id, transferred_at) 
+               (id_prospect, from_user_id, to_user_id, transfer_date) 
                VALUES (?, ?, ?, NOW())''',
             [prospectId, fromUserId, toUserId],
           );
@@ -227,7 +227,7 @@ class TransactionalProspectService {
         (connection) async {
           // Étape 1: Vérifier qu'aucun prospect avec cet email n'existe
           final existingResult = await connection.query(
-            'SELECT COUNT(*) as count FROM Prospect WHERE email = ? AND deleted_at IS NULL',
+            'SELECT COUNT(*) as count FROM Prospect WHERE email = ?',
             [email],
           );
 
@@ -252,13 +252,14 @@ class TransactionalProspectService {
 
           // Étape 3: Enregistrer dans l'audit
           await connection.query(
-            '''INSERT INTO AuditLog 
-               (user_id, action, table_name, record_id, new_value, created_at) 
-               VALUES (?, 'CREATE', 'Prospect', ?, ?, NOW())''',
+            '''INSERT INTO audit_logs 
+               (table_name, record_id, action, user_id, new_values, change_description, created_at) 
+               VALUES ('Prospect', ?, 'INSERT', ?, ?, ?, NOW())''',
             [
-              userId,
               prospectId,
-              'Prospect: $nom $prenom, Email: $email',
+              userId,
+              jsonEncode({'nomp': nom, 'prenomp': prenom, 'email': email}),
+              'Prospect créé: $nom $prenom',
             ],
           );
 

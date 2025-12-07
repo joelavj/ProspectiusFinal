@@ -19,7 +19,10 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProspects();
+    // Utiliser addPostFrameCallback pour éviter setState() pendant le build
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProspects();
+    });
   }
 
   void _loadProspects() {
@@ -35,46 +38,76 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
     return Scaffold(
       body: Consumer<ProspectProvider>(
         builder: (context, prospectProvider, _) {
-          return SimpleStateBuilder(
-            isLoading: prospectProvider.isLoading,
-            error: prospectProvider.error,
-            child: prospectProvider.prospects.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.people_outline,
-                            size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Aucun prospect',
-                          style:
-                              TextStyle(fontSize: 18, color: Colors.grey[600]),
+          return Column(
+            children: [
+              // Bouton d'actualisation en haut
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed:
+                          prospectProvider.isLoading ? null : _loadProspects,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Actualiser'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const AddProspectScreen(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.add),
-                          label: const Text('Ajouter un prospect'),
-                        ),
-                      ],
+                      ),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(12),
-                    itemCount: prospectProvider.prospects.length,
-                    itemBuilder: (context, index) {
-                      final prospect = prospectProvider.prospects[index];
-                      return _buildProspectListItem(
-                          context, prospect, prospectProvider);
-                    },
-                  ),
+                  ],
+                ),
+              ),
+              // Contenu principal
+              Expanded(
+                child: SimpleStateBuilder(
+                  isLoading: prospectProvider.isLoading,
+                  error: prospectProvider.error,
+                  child: prospectProvider.prospects.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.people_outline,
+                                  size: 64, color: Colors.grey[400]),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Aucun prospect',
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.grey[600]),
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const AddProspectScreen(),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.add),
+                                label: const Text('Ajouter un prospect'),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(12),
+                          itemCount: prospectProvider.prospects.length,
+                          itemBuilder: (context, index) {
+                            final prospect = prospectProvider.prospects[index];
+                            return _buildProspectListItem(
+                                context, prospect, prospectProvider);
+                          },
+                        ),
+                ),
+              ),
+            ],
           );
         },
       ),
