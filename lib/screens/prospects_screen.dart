@@ -35,34 +35,34 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
     return Scaffold(
       body: Consumer<ProspectProvider>(
         builder: (context, prospectProvider, _) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Bouton d'actualisation en haut
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed:
-                            prospectProvider.isLoading ? null : _loadProspects,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Actualiser'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+          return Column(
+            children: [
+              // Bouton d'actualisation en haut
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed:
+                          prospectProvider.isLoading ? null : _loadProspects,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Actualiser'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                // Contenu principal
-                SimpleStateBuilder(
+              ),
+              // Contenu principal
+              Expanded(
+                child: SimpleStateBuilder(
                   isLoading: prospectProvider.isLoading,
                   error: prospectProvider.error,
                   child: prospectProvider.prospects.isEmpty
@@ -103,8 +103,8 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
                           },
                         ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),

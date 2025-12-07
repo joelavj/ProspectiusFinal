@@ -35,42 +35,38 @@ class _ClientsScreenState extends State<ClientsScreen> {
     return Scaffold(
       body: Consumer<ProspectProvider>(
         builder: (context, prospectProvider, child) {
-          return SingleChildScrollView(
-            child: Column(
-              children: [
-                // Bouton d'actualisation en haut
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed:
-                            prospectProvider.isLoading ? null : _loadClients,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Actualiser'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 12,
-                          ),
+          return Column(
+            children: [
+              // Bouton d'actualisation en haut
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed:
+                          prospectProvider.isLoading ? null : _loadClients,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Actualiser'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                // Contenu principal
-                if (prospectProvider.isLoading)
-                  const Padding(
-                    padding: EdgeInsets.all(32),
-                    child: Center(child: CircularProgressIndicator()),
-                  )
-                else
-                  _buildClientsList(prospectProvider),
-              ],
-            ),
+              ),
+              // Contenu principal
+              Expanded(
+                child: prospectProvider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : _buildClientsList(prospectProvider),
+              ),
+            ],
           );
         },
       ),
