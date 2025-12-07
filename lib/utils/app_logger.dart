@@ -55,7 +55,7 @@ class AppLogger {
 
   /// Log les paramètres de requête
   static void logRequest(String method, String sql, [List<dynamic>? params]) {
-    _logger.d('[$method] $sql', error: params);
+    _logger.d('[$method] $sql');
     _fileLogger.logDebug('[$method] $sql');
     if (params != null) {
       _fileLogger.logDebug('Params: $params');
