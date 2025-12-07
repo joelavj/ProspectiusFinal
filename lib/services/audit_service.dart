@@ -56,7 +56,7 @@ class AuditService {
     required Map<String, dynamic> prospectData,
   }) async {
     await logAudit(
-      tableName: 'prospects',
+      tableName: 'Prospect',
       recordId: prospectId,
       action: 'INSERT',
       userId: userId,
@@ -82,7 +82,7 @@ class AuditService {
     });
 
     await logAudit(
-      tableName: 'prospects',
+      tableName: 'Prospect',
       recordId: prospectId,
       action: 'UPDATE',
       userId: userId,
@@ -98,7 +98,7 @@ class AuditService {
     required int userId,
   }) async {
     await logAudit(
-      tableName: 'prospects',
+      tableName: 'Prospect',
       recordId: prospectId,
       action: 'DELETE',
       userId: userId,
@@ -114,7 +114,7 @@ class AuditService {
     required Map<String, dynamic> interactionData,
   }) async {
     await logAudit(
-      tableName: 'interactions',
+      tableName: 'Interaction',
       recordId: interactionId,
       action: 'INSERT',
       userId: userId,
