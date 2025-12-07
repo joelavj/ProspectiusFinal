@@ -33,6 +33,22 @@ class _ClientsScreenState extends State<ClientsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Consumer<ProspectProvider>(
+              builder: (context, prospectProvider, _) {
+                return IconButton(
+                  onPressed: prospectProvider.isLoading ? null : _loadClients,
+                  icon: const Icon(Icons.refresh),
+                  tooltip: 'Actualiser',
+                );
+              },
+            ),
+          ),
+        ],
+      ),
       body: Consumer<ProspectProvider>(
         builder: (context, prospectProvider, child) {
           if (prospectProvider.isLoading) {
