@@ -85,8 +85,6 @@ coverage/
 
 # Build and Release
 build/
-Releases/Prospectius-**/*/Release/
-Releases/**/*.zip
 
 # Exceptions to above rules.
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
