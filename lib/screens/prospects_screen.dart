@@ -34,8 +34,6 @@ class _ProspectsScreenState extends State<ProspectsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Mes Prospects'),
-        elevation: 0,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
