@@ -62,6 +62,44 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
 
     if (authProvider.currentUser == null) return;
 
+    // Afficher le dialogue de confirmation
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(
+                widget.prospect != null
+                    ? 'Confirmer la modification'
+                    : 'Créer le prospect',
+              ),
+              content: Text(
+                widget.prospect != null
+                    ? 'Êtes-vous sûr de vouloir modifier ce prospect?'
+                    : 'Êtes-vous sûr de vouloir créer ce prospect?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 6, 206, 112),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text(
+                    'Confirmer',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+
+    if (!confirmed) return;
+
     if (widget.prospect != null) {
       await prospectProvider
           .updateProspect(authProvider.currentUser!.id, widget.prospect!.id, {
@@ -73,6 +111,35 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
         'type': _selectedType,
         'status': _selectedStatus,
       });
+
+      // Afficher le message de succès dans un dialogue
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Succès'),
+              content: const Text('Prospect modifié avec succès'),
+              actions: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 6, 206, 112),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                    Navigator.of(context)
+                        .pop(); // Retourner à l'écran précédent
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
     } else {
       // Créer le prospect et l'interaction en même temps
       final prospectCreated = await prospectProvider.createProspect(
@@ -87,15 +154,11 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
 
       // Si le prospect est créé, créer l'interaction
       if (prospectCreated && _interactionNoteController.text.isNotEmpty) {
-        // Trouver le prospect créé en le cherchant par nom et prénom
-        // (l'assignation est garantie d'être l'utilisateur actuel)
         final createdProspect = prospectProvider.prospects.firstWhere(
           (p) =>
               p.nom == _nomController.text &&
               p.prenom == _prenomController.text,
           orElse: () {
-            // Si pour une raison quelconque on ne trouve pas le prospect,
-            // on retourne null et on n'ajoute pas d'interaction
             return Prospect(
               id: -1,
               assignation: 0,
@@ -112,7 +175,6 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
           },
         );
 
-        // Vérifier que le prospect a bien été créé
         if (createdProspect.id != -1) {
           await prospectProvider.createInteraction(
             createdProspect.id,
@@ -123,10 +185,35 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
           );
         }
       }
-    }
 
-    if (mounted) {
-      Navigator.of(context).pop();
+      // Afficher le message de succès dans un dialogue
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Succès'),
+              content: const Text('Prospect créé avec succès'),
+              actions: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 6, 206, 112),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                    Navigator.of(context)
+                        .pop(); // Retourner à l'écran précédent
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
@@ -336,14 +423,15 @@ class _AddProspectScreenState extends State<AddProspectScreen> {
                     child: ElevatedButton(
                       onPressed: _handleSave,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green[400],
+                        backgroundColor: const Color.fromARGB(255, 6, 206, 112),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       child: Text(
                         widget.prospect != null ? 'Mettre à jour' : 'Créer',
-                        style: const TextStyle(fontSize: 16),
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ),
                   ),

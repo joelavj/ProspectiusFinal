@@ -56,6 +56,37 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
 
     if (authProvider.currentUser == null) return;
 
+    // Afficher le dialogue de confirmation
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Confirmer la modification'),
+              content:
+                  const Text('Êtes-vous sûr de vouloir modifier ce prospect?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 6, 206, 112),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text(
+                    'Confirmer',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+
+    if (!confirmed) return;
+
     setState(() => _isLoading = true);
 
     final success = await prospectProvider.updateProspect(
@@ -75,32 +106,140 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Prospect mis à jour avec succès'),
-          duration: Duration(seconds: 2),
-        ),
+      // Afficher le message de succès dans un dialogue
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Succès'),
+            content: const Text('Prospect modifié avec succès'),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 6, 206, 112),
+                ),
+                onPressed: () {
+                  // Créer le prospect mis à jour
+                  final updatedProspect = Prospect(
+                    id: widget.prospect.id,
+                    nom: _nomController.text,
+                    prenom: _prenomController.text,
+                    email: _emailController.text,
+                    telephone: _telephoneController.text,
+                    adresse: _adresseController.text,
+                    type: _selectedType,
+                    status: _selectedStatus,
+                    creation: widget.prospect.creation,
+                    dateUpdate: DateTime.now(),
+                    assignation: widget.prospect.assignation,
+                  );
+                  Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                  Navigator.of(context)
+                      .pop(updatedProspect); // Retourner l'objet
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
       );
-
-      // Créer le prospect mis à jour
-      final updatedProspect = Prospect(
-        id: widget.prospect.id,
-        nom: _nomController.text,
-        prenom: _prenomController.text,
-        email: _emailController.text,
-        telephone: _telephoneController.text,
-        adresse: _adresseController.text,
-        type: _selectedType,
-        status: _selectedStatus,
-        creation: widget.prospect.creation,
-        dateUpdate: DateTime.now(),
-        assignation: widget.prospect.assignation,
-      );
-
-      if (mounted) {
-        Navigator.of(context).pop(updatedProspect);
-      }
     }
+  }
+
+  void _handleSaveAndAddInteraction() async {
+    final authProvider = context.read<AuthProvider>();
+    final prospectProvider = context.read<ProspectProvider>();
+
+    if (authProvider.currentUser == null) return;
+
+    // Afficher le dialogue de confirmation
+    final confirmed = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Mettre à jour et ajouter une interaction'),
+              content: const Text(
+                'Les informations du prospect seront mises à jour, puis vous pourrez ajouter une interaction.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Annuler'),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 6, 206, 112),
+                  ),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text(
+                    'Continuer',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+
+    if (!confirmed) return;
+
+    setState(() => _isLoading = true);
+
+    // Mettre à jour le prospect
+    final success = await prospectProvider.updateProspect(
+      authProvider.currentUser!.id,
+      widget.prospect.id,
+      {
+        'nomp': _nomController.text,
+        'prenomp': _prenomController.text,
+        'email': _emailController.text,
+        'telephone': _telephoneController.text,
+        'adresse': _adresseController.text,
+        'type': _selectedType,
+        'status': _selectedStatus,
+      },
+    );
+
+    setState(() => _isLoading = false);
+
+    if (success && mounted) {
+      // Afficher un message avant de passer à l'interaction
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Succès'),
+            content: const Text(
+                'Prospect modifié avec succès\n\nVous pouvez maintenant ajouter une interaction.'),
+            actions: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 6, 206, 112),
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                  // Scroll vers la section interaction
+                  _scrollToInteractionSection();
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  void _scrollToInteractionSection() {
+    // Scroll vers le bas pour afficher la section d'interaction
+    // (À implémenter si vous avez un ScrollController)
   }
 
   void _handleAddInteraction() async {
@@ -317,35 +456,76 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 44,
-                            child: ElevatedButton(
-                              onPressed:
-                                  _isLoading ? null : _handleSaveProspect,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue[700],
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SizedBox(
+                                  height: 44,
+                                  child: ElevatedButton(
+                                    onPressed:
+                                        _isLoading ? null : _handleSaveProspect,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue[700],
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Enregistrer',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                  ),
                                 ),
                               ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
-                                        strokeWidth: 2,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: SizedBox(
+                                  height: 44,
+                                  child: ElevatedButton(
+                                    onPressed: _isLoading
+                                        ? null
+                                        : _handleSaveAndAddInteraction,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(
+                                          255, 6, 206, 112),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                    )
-                                  : const Text(
-                                      'Enregistrer les informations',
-                                      style: TextStyle(color: Colors.white),
                                     ),
-                            ),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: CircularProgressIndicator(
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                              strokeWidth: 2,
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Ajouter interaction',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -412,7 +592,8 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
                               onPressed:
                                   _isLoading ? null : _handleAddInteraction,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green[700],
+                                backgroundColor:
+                                    const Color.fromARGB(255, 6, 206, 112),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
