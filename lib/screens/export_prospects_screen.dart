@@ -291,8 +291,10 @@ class _ExportProspectsScreenState extends State<ExportProspectsScreen> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.green[50],
-                        border: Border.all(color: Colors.green),
+                        color: const Color.fromARGB(255, 6, 206, 112)
+                            .withOpacity(0.1),
+                        border: Border.all(
+                            color: const Color.fromARGB(255, 6, 206, 112)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
@@ -301,13 +303,14 @@ class _ExportProspectsScreenState extends State<ExportProspectsScreen> {
                           Row(
                             children: [
                               Icon(Icons.check_circle,
-                                  color: Colors.green[700]),
+                                  color:
+                                      const Color.fromARGB(255, 6, 206, 112)),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   'Export réussi',
-                                  style: TextStyle(
-                                    color: Colors.green[700],
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 6, 206, 112),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -317,7 +320,8 @@ class _ExportProspectsScreenState extends State<ExportProspectsScreen> {
                           const SizedBox(height: 12),
                           Text(
                             _successMessage!,
-                            style: TextStyle(color: Colors.green[700]),
+                            style: const TextStyle(
+                                color: Color.fromARGB(255, 6, 206, 112)),
                           ),
                         ],
                       ),
