@@ -354,7 +354,7 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
                                   ),
                                   hintText: 'Décrivez votre interaction...',
                                 ),
-                                maxLines: 5,
+                                maxLines: 8,
                               ),
                             ],
                           ),
@@ -363,7 +363,8 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
                     ),
                     // Footer
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
