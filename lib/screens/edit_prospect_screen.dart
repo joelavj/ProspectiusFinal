@@ -280,84 +280,81 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
                       ),
                     ),
                     // Content
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 6, 206, 112)
-                                      .withOpacity(0.05),
+                    SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 6, 206, 112)
+                                    .withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: const Color.fromARGB(255, 6, 206, 112),
+                                ),
+                              ),
+                              child: Text(
+                                'Prospect: ${_nomController.text} ${_prenomController.text}',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            DropdownButtonFormField<String>(
+                              initialValue: _selectedInteractionType,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedInteractionType = value ?? 'appel';
+                                });
+                              },
+                              items: [
+                                'appel',
+                                'email',
+                                'sms',
+                                'reunion',
+                                'message',
+                                'autre'
+                              ]
+                                  .map(
+                                    (type) => DropdownMenuItem(
+                                      value: type,
+                                      child: Text(type),
+                                    ),
+                                  )
+                                  .toList(),
+                              decoration: InputDecoration(
+                                labelText: 'Type d\'interaction',
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 12,
+                                ),
+                                border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color:
-                                        const Color.fromARGB(255, 6, 206, 112),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Prospect: ${_nomController.text} ${_prenomController.text}',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              DropdownButtonFormField<String>(
-                                initialValue: _selectedInteractionType,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _selectedInteractionType = value ?? 'appel';
-                                  });
-                                },
-                                items: [
-                                  'appel',
-                                  'email',
-                                  'sms',
-                                  'reunion',
-                                  'message',
-                                  'autre'
-                                ]
-                                    .map(
-                                      (type) => DropdownMenuItem(
-                                        value: type,
-                                        child: Text(type),
-                                      ),
-                                    )
-                                    .toList(),
-                                decoration: InputDecoration(
-                                  labelText: 'Type d\'interaction',
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 12,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                            ),
+                            const SizedBox(height: 16),
+                            TextField(
+                              controller: _interactionDescriptionController,
+                              decoration: InputDecoration(
+                                labelText: 'Description',
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 12,
                                 ),
-                              ),
-                              const SizedBox(height: 16),
-                              TextField(
-                                controller: _interactionDescriptionController,
-                                decoration: InputDecoration(
-                                  labelText: 'Description',
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 12,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  hintText: 'Décrivez votre interaction...',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                maxLines: 8,
+                                hintText: 'Décrivez votre interaction...',
                               ),
-                            ],
-                          ),
+                              maxLines: 8,
+                            ),
+                          ],
                         ),
                       ),
                     ),
