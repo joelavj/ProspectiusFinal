@@ -170,7 +170,6 @@ class _LogsViewerScreenState extends State<LogsViewerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
         elevation: 0,
         actions: [
           IconButton(
