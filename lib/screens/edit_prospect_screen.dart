@@ -221,120 +221,194 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Ajouter une interaction'),
-              content: SingleChildScrollView(
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: 500,
+                  maxHeight: 600,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      'Prospect: ${_nomController.text} ${_prenomController.text}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                    // Header
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 6, 206, 112)
+                            .withOpacity(0.1),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      initialValue: _selectedInteractionType,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedInteractionType = value ?? 'appel';
-                        });
-                      },
-                      items: [
-                        'appel',
-                        'email',
-                        'sms',
-                        'reunion',
-                        'message',
-                        'autre'
-                      ]
-                          .map(
-                            (type) => DropdownMenuItem(
-                              value: type,
-                              child: Text(type),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Ajouter une interaction',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-                          )
-                          .toList(),
-                      decoration: InputDecoration(
-                        labelText: 'Type d\'interaction',
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              _interactionDescriptionController.clear();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Content
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 6, 206, 112)
+                                      .withOpacity(0.05),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color:
+                                        const Color.fromARGB(255, 6, 206, 112),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Prospect: ${_nomController.text} ${_prenomController.text}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              DropdownButtonFormField<String>(
+                                initialValue: _selectedInteractionType,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _selectedInteractionType = value ?? 'appel';
+                                  });
+                                },
+                                items: [
+                                  'appel',
+                                  'email',
+                                  'sms',
+                                  'reunion',
+                                  'message',
+                                  'autre'
+                                ]
+                                    .map(
+                                      (type) => DropdownMenuItem(
+                                        value: type,
+                                        child: Text(type),
+                                      ),
+                                    )
+                                    .toList(),
+                                decoration: InputDecoration(
+                                  labelText: 'Type d\'interaction',
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              TextField(
+                                controller: _interactionDescriptionController,
+                                decoration: InputDecoration(
+                                  labelText: 'Description',
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 12,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  hintText: 'Décrivez votre interaction...',
+                                ),
+                                maxLines: 5,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _interactionDescriptionController,
-                      decoration: InputDecoration(
-                        labelText: 'Description',
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 12,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        hintText: 'Décrivez votre interaction...',
+                    // Footer
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              _interactionDescriptionController.clear();
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('Ignorer'),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromARGB(255, 6, 206, 112),
+                            ),
+                            onPressed: _interactionDescriptionController
+                                    .text.isEmpty
+                                ? null
+                                : () async {
+                                    if (authProvider.currentUser == null)
+                                      return;
+
+                                    setState(() => _isLoading = true);
+
+                                    await prospectProvider.createInteraction(
+                                      widget.prospect.id,
+                                      authProvider.currentUser!.id,
+                                      _selectedInteractionType,
+                                      _interactionDescriptionController.text,
+                                      DateTime.now().toUtc(),
+                                    );
+
+                                    setState(() => _isLoading = false);
+
+                                    _interactionDescriptionController.clear();
+
+                                    if (mounted) {
+                                      Navigator.of(context).pop();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Interaction ajoutée avec succès'),
+                                          duration: Duration(seconds: 2),
+                                        ),
+                                      );
+                                    }
+                                  },
+                            child: Text(
+                              _isLoading ? 'Ajout...' : 'Ajouter',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 3,
                     ),
                   ],
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    _interactionDescriptionController.clear();
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Ignorer'),
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 6, 206, 112),
-                  ),
-                  onPressed: _interactionDescriptionController.text.isEmpty
-                      ? null
-                      : () async {
-                          if (authProvider.currentUser == null) return;
-
-                          setState(() => _isLoading = true);
-
-                          await prospectProvider.createInteraction(
-                            widget.prospect.id,
-                            authProvider.currentUser!.id,
-                            _selectedInteractionType,
-                            _interactionDescriptionController.text,
-                            DateTime.now().toUtc(),
-                          );
-
-                          setState(() => _isLoading = false);
-
-                          _interactionDescriptionController.clear();
-
-                          if (mounted) {
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Interaction ajoutée avec succès'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        },
-                  child: Text(
-                    _isLoading ? 'Ajout...' : 'Ajouter',
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
             );
           },
         );
@@ -626,95 +700,6 @@ class _EditProspectScreenState extends State<EditProspectScreen> {
                                 ),
                               ),
                             ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // Section Ajouter une interaction
-                  Text(
-                    'Ajouter une interaction',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          DropdownButtonFormField<String>(
-                            initialValue: _selectedInteractionType,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedInteractionType = value ?? 'appel';
-                              });
-                            },
-                            items: ['appel', 'email', 'sms', 'reunion']
-                                .map(
-                                  (type) => DropdownMenuItem(
-                                    value: type,
-                                    child: Text(type),
-                                  ),
-                                )
-                                .toList(),
-                            decoration: InputDecoration(
-                              labelText: 'Type d\'interaction',
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 12,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _interactionDescriptionController,
-                            decoration: InputDecoration(
-                              labelText: 'Description',
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 12,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            maxLines: 3,
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 44,
-                            child: ElevatedButton(
-                              onPressed:
-                                  _isLoading ? null : _handleAddInteraction,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    const Color.fromARGB(255, 6, 206, 112),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: _isLoading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Ajouter interaction',
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                            ),
                           ),
                         ],
                       ),
