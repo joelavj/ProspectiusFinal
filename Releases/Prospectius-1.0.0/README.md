@@ -504,22 +504,6 @@ mysql -u root -p Prospectius < backup.sql
 - Authentification utilisateur
 - Audit complet
 
-### v1.1.0 (Q1 2026)
-- Calendrier des suivis
-- Intégration email
-- Export PDF avancé
-- Notifications push
-- Rapports personnalisés
-
-### v2.0.0 (H1 2026)
-- App mobile native (iOS/Android)
-- API REST publique
-- Synchronisation cloud
-- IA pour recommandations
-- Webhooks et intégrations
-
----
-
 ## 📜 Licence
 
 Prospectius est sous licence **MIT**. Vous êtes libre d'utiliser, modifier et distribuer cette application.
@@ -528,7 +512,7 @@ Prospectius est sous licence **MIT**. Vous êtes libre d'utiliser, modifier et d
 
 ## 👨‍💻 À Propos
 
-Développé par **Joseph Avila** (@josoavj)
+Développé par **Josoa** (@josoavj)
 
 **Remerciements spéciaux** aux contributeurs et utilisateurs bêta qui ont aidé à améliorer Prospectius.
 
