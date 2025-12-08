@@ -218,8 +218,11 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
                           height: 44,
                           child: ElevatedButton.icon(
                             onPressed: _showChangeConfigDialog,
-                            icon: const Icon(Icons.edit),
-                            label: const Text('Modifier la configuration'),
+                            icon: const Icon(Icons.edit, color: Colors.white),
+                            label: const Text(
+                              'Modifier la configuration',
+                              style: TextStyle(color: Colors.white),
+                            ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.orange[700],
                               shape: RoundedRectangleBorder(
@@ -317,7 +320,8 @@ class _ConfigurationScreenState extends State<ConfigurationScreen> {
                                       ? null
                                       : _handleChangeConfig,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green[700],
+                                    backgroundColor:
+                                        const Color.fromARGB(255, 6, 206, 112),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(8),
                                     ),
